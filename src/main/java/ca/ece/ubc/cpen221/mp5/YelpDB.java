@@ -61,7 +61,46 @@ public class YelpDB implements MP5Db {
             }
         }
     }
+    
+    public void addReview() {
+    	
+    }
+    /**
+     * 
+     * @return Returns a set of all the restaurant names in the database
+     */
+    public Set<String> getRestaurantSet() {
+    	return this.restaurantMap.keySet();
+    }
 
+    /**
+     * 
+     * @return Returns a set of all the review_id's in the database
+     */
+    public Set<String> getReviewSet() {
+    	return this.reviewMap.keySet();
+    }
+    
+    /**
+     * @return Returns a set of all user_id's in the database
+     */
+    public Set<String> getUserSet() {
+    	return this.userMap.keySet();
+    }
+    
+    /**
+     * @param r - Restaurant name
+     * @return Returns the price rating of the restaurant
+     */
+    public int getRestaurantPrice(Restaurant r) {
+    	return this.restaurantMap.get(r).getPrice();
+    }
+    public double getRestaurantLongitude(Restaurant r) {
+    	return this.restaurantMap.get(r).getLongitude();
+    }
+    public double getRestaurantLatitude(Restaurant r) {
+    	return this.restaurantMap.get(r).getLatitude();
+    }
     /**
      * Perform a structured query and return the set of objects that matches the
      * query
