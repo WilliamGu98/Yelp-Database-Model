@@ -19,6 +19,10 @@ public class Restaurant extends YelpElement {
     private String[] schools;
     private int price;
     
+    public int getPrice() {
+    	return this.price;
+    }
+    
     @Override
     public String toString() {
         return this.name;
