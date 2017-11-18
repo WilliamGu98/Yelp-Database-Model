@@ -147,28 +147,19 @@ public class YelpDB implements MP5Db {
             }
         }
 
-        double meanX = computeMean(user_ratings);
-        double meanY = computeMean(restaurant_price);
-        double Sxx = computeSxx(user_ratings, meanX);
-        double Syy = computeSxx(restaurant_price, meanY);
-        double Sxy = computeSxy(user_ratings, meanX, restaurant_price, meanY);
+        double meanX = computeMean(restaurant_price);
+        double meanY = computeMean(user_ratings);
+        double Sxx = computeSxx(restaurant_price, meanX);
+        double Syy = computeSxx(user_ratings, meanY);
+        double Sxy = computeSxy(restaurant_price, meanX, user_ratings, meanY);
 
         double b = Sxy / Sxx;
         double a = meanY - b * meanX;
 
-        System.out.println("User ratings:" + user_ratings);
-        System.out.println("Restaurant price" + restaurant_price);
-        System.out.println("MeanX:" + meanX);
-        System.out.println("MeanY:" + meanY);
-        System.out.println("Sxx:" + Sxx);
-        System.out.println("Sxy:" + Sxy);
-        System.out.println("b:" + b);
-        System.out.println("a:" + a);
-
         ToDoubleBiFunction<String, YelpDB> function = (restaurantID, database) -> {
             // Function logic
             double price = database.getRestaurantPrice(restaurantID);
-            return (price - a) / b; // Need to reverse this
+            return a + b * price;
         };
 
         return function;
