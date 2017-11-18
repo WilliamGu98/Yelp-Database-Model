@@ -3,10 +3,10 @@ Implementing YelpDB constructor:
   use Gson.fromJson(String json, class) to convert each JSON string to its respective class (restaurant, review, user)
   each class will have its own instance variables which have been parsed by JSON
 
-Methods to add to YelpDB:
-Observer methods:
-  getReviewList()
-  getRestaurantList()
+Methods to add to YelpDB:  
+Observer methods:  
+  getReviewList()  
+  getRestaurantList()  
   getUserList()
   getRestaurant(String businessID)
   // least-squares regression
