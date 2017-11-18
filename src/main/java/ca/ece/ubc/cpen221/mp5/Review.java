@@ -1,7 +1,7 @@
 package ca.ece.ubc.cpen221.mp5;
 import java.util.*;
 
-public class Review extends YelpElement{
+public class Review implements YelpElement{
     private String review_id;
 	private String type;
 	private String business_id;

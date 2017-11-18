@@ -1,6 +1,6 @@
 package ca.ece.ubc.cpen221.mp5;
 
-public class Restaurant extends YelpElement {
+public class Restaurant implements YelpElement {
     private String name;
     private boolean open;
     private String url;
@@ -24,10 +24,11 @@ public class Restaurant extends YelpElement {
     }
 
     public double getLongitude() {
-    	return this.longitude;
+        return this.longitude;
     }
+
     public double getLatitude() {
-    	return this.latitude;
+        return this.latitude;
     }
 
     @Override

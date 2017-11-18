@@ -1,7 +1,7 @@
 package ca.ece.ubc.cpen221.mp5;
 import java.util.*;
 
-public class User {
+public class User implements YelpElement{
     
     private String url;
     private Map<String,Integer> votes;
