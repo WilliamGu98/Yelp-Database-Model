@@ -1,6 +1,5 @@
 package ca.ece.ubc.cpen221.mp5;
 
-
 import java.io.*;
 import java.util.*;
 import java.util.function.ToDoubleBiFunction;
@@ -8,11 +7,10 @@ import java.util.function.ToDoubleBiFunction;
 import com.google.gson.*;
 
 public class YelpDB implements MP5Db {
-    
-    private Map<String, Restaurant> restaurantMap; //Name -> Restaurant
-    private Map<String, Review> reviewMap; //Review_id -> Review
-    private Map<String, User> userMap; //User_id -> User
-    
+
+    private Map<String, Restaurant> restaurantMap; // Name -> Restaurant
+    private Map<String, Review> reviewMap; // Review_id -> Review
+    private Map<String, User> userMap; // User_id -> User
 
     /**
      * Constructor
@@ -25,13 +23,13 @@ public class YelpDB implements MP5Db {
      *            name of file for list of users
      */
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
-        
+
         Gson gson = new Gson();
         this.restaurantMap = new HashMap<String, Restaurant>();
         this.reviewMap = new HashMap<String, Review>();
         this.userMap = new HashMap<String, User>();
-        
-        //Process restaurants
+
+        // Process restaurants
         try (BufferedReader reader = new BufferedReader(new FileReader(restaurants))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -40,8 +38,8 @@ public class YelpDB implements MP5Db {
                 this.restaurantMap.put(name, r);
             }
         }
-        
-        //Process reviews
+
+        // Process reviews
         try (BufferedReader reader = new BufferedReader(new FileReader(reviews))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -50,8 +48,8 @@ public class YelpDB implements MP5Db {
                 this.reviewMap.put(review_id, r);
             }
         }
-        
-        //Process users
+
+        // Process users
         try (BufferedReader reader = new BufferedReader(new FileReader(users))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -92,20 +90,47 @@ public class YelpDB implements MP5Db {
      * 
      * @param user
      *            represents a user_id in the database
-     * @return a function that predicts the user's ratings for objects (of type
-     *         T) in the database of type MP5Db<T>. The function that is
-     *         returned takes two arguments: one is the database and other other
-     *         is a String that represents the id of an object of type T.
+     * @return a function that predicts the user's ratings for objects (of type T)
+     *         in the database of type MP5Db<T>. The function that is returned takes
+     *         two arguments: one is the database and other other is a String that
+     *         represents the id of an object of type T.
      */
     @Override
     public ToDoubleBiFunction getPredictorFunction(String user) {
-        // TODO Auto-generated method stub
+        List<Integer> user_ratings; //x
+        List<Integer> restaurant_price; //y
+        
+        for(Review r : this.reviewMap.values()) {
+            
+        }
+        
         return null;
     }
-    
-    
-    private static double computeSxx(List<Integer> x) {
-        return 0;
+
+    private static double computeMean(List<Integer> intList) {
+        double count = 0;
+        for (Integer i : intList) {
+            count += i;
+        }
+        return count / intList.size();
+    }
+
+    // Helper for computing Sxx and Sxy
+    private static double computeSxx(List<Integer> intList, double mean) {
+        double total = 0;
+        for (Integer i : intList) {
+            total += Math.pow((i - mean), 2);
+        }
+        return total;
+    }
+
+    // Requires size of intListX and intListY to be the same
+    private static double computeSxy(List<Integer> intListX, double meanX, List<Integer> intListY, double meanY) {
+        double total = 0;
+        for (int i = 0; i < intListX.size(); i++) {
+            total += (intListX.get(i) - meanX) * (intListY.get(i) - meanY);
+        }
+        return total;
     }
 
 }
