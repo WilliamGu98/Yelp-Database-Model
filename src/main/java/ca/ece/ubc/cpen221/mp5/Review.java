@@ -1,5 +1,4 @@
 package ca.ece.ubc.cpen221.mp5;
-
 import java.util.*;
 
 public class Review {
@@ -11,6 +10,5 @@ public class Review {
 	public int stars;
 	public String user_id;
 	public String date;
-	
 
 }
