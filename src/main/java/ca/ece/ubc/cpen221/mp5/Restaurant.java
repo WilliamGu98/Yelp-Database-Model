@@ -18,5 +18,4 @@ public class Restaurant extends YelpElement {
     private int review_count;
     private String[] schools;
     private int price;
-
 }
