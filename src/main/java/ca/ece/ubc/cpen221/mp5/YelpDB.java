@@ -9,9 +9,9 @@ import com.google.gson.*;
 
 public class YelpDB implements MP5Db {
     
-    private Set<Restaurant> restaurantSet;
-    private Set<Review> reviewSet;
-    private Set<User> userSet;
+    private Map<String, Restaurant> restaurantMap; //Name -> Restaurant
+    private Map<String, Review> reviewMap; //Review_id -> Review
+    private Map<String, User> userMap; //User_id -> User
     
 
     /**
@@ -27,15 +27,17 @@ public class YelpDB implements MP5Db {
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
         
         Gson gson = new Gson();
-        this.restaurantSet = new HashSet<Restaurant>();
-        this.reviewSet = new HashSet<Review>();
-        this.userSet = new HashSet<User>();
+        this.restaurantMap = new HashMap<String, Restaurant>();
+        this.reviewMap = new HashMap<String, Review>();
+        this.userMap = new HashMap<String, User>();
         
         //Process restaurants
         try (BufferedReader reader = new BufferedReader(new FileReader(restaurants))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                this.restaurantSet.add(gson.fromJson(line, Restaurant.class));
+                Restaurant r = gson.fromJson(line, Restaurant.class);
+                String name = r.toString();
+                this.restaurantMap.put(name, r);
             }
         }
         
@@ -43,7 +45,9 @@ public class YelpDB implements MP5Db {
         try (BufferedReader reader = new BufferedReader(new FileReader(reviews))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                this.restaurantSet.add(gson.fromJson(line, Restaurant.class));
+                Review r = gson.fromJson(line, Review.class);
+                String review_id = r.toString();
+                this.reviewMap.put(review_id, r);
             }
         }
         
@@ -51,27 +55,57 @@ public class YelpDB implements MP5Db {
         try (BufferedReader reader = new BufferedReader(new FileReader(users))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                this.restaurantSet.add(gson.fromJson(line, Restaurant.class));
+                User u = gson.fromJson(line, User.class);
+                String user_id = u.toString();
+                this.userMap.put(user_id, u);
             }
         }
     }
 
+    /**
+     * Perform a structured query and return the set of objects that matches the
+     * query
+     * 
+     * @param queryString
+     * @return the set of objects that matches the query
+     */
     @Override
     public Set getMatches(String queryString) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /**
+     * Cluster objects into k clusters using k-means clustering
+     * 
+     * @param k
+     *            number of clusters to create (0 < k <= number of objects)
+     * @return a String, in JSON format, that represents the clusters
+     */
     @Override
     public String kMeansClusters_json(int k) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /**
+     * 
+     * @param user
+     *            represents a user_id in the database
+     * @return a function that predicts the user's ratings for objects (of type
+     *         T) in the database of type MP5Db<T>. The function that is
+     *         returned takes two arguments: one is the database and other other
+     *         is a String that represents the id of an object of type T.
+     */
     @Override
     public ToDoubleBiFunction getPredictorFunction(String user) {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    
+    private static double computeSxx(List<Integer> x) {
+        return 0;
     }
 
 }

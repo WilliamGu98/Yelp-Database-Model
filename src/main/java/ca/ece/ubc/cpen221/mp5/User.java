@@ -13,15 +13,24 @@ public class User {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("url: " + this.url + "\n");
-        sb.append("votes: " + this.votes + "\n");
-        sb.append("review_count: " + this.review_count + "\n");
-        sb.append("type: " + this.type + "\n");
-        sb.append("user_id: " + this.user_id + "\n");
-        sb.append("name: " + this.name + "\n");
-        sb.append("average_stars: " + this.average_stars);
+        return this.user_id;
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.user_id.hashCode();
         
-        return sb.toString();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof User)) {
+            return false;
+        }
+        User other = (User) obj;
+        return this.user_id.equals(other.user_id);
     }
 }
