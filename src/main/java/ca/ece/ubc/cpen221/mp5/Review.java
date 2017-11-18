@@ -11,6 +11,18 @@ public class Review extends YelpElement{
 	private String user_id;
 	private String date;
 	
+	public String getUserId() {
+	    return this.user_id;
+	}
+	
+	public int getRating() {
+	    return stars;
+	}
+	
+	public String getBusinessId() {
+	    return business_id;
+	}
+	
     @Override
     public String toString() {
         return this.review_id;

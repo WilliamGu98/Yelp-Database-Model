@@ -18,22 +18,22 @@ public class Restaurant extends YelpElement {
     private int review_count;
     private String[] schools;
     private int price;
-    
+
     public int getPrice() {
-    	return this.price;
+        return this.price;
     }
-    
+
     @Override
     public String toString() {
-        return this.name;
+        return this.business_id;
     }
-    
+
     @Override
     public int hashCode() {
-        return this.name.hashCode();
-        
+        return this.business_id.hashCode();
+
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -43,6 +43,6 @@ public class Restaurant extends YelpElement {
             return false;
         }
         Restaurant other = (Restaurant) obj;
-        return this.name.equals(other.name);
+        return this.business_id.equals(other.business_id);
     }
 }
