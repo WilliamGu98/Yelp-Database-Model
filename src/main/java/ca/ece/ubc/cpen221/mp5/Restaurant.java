@@ -22,7 +22,12 @@ public class Restaurant extends YelpElement {
     public int getPrice() {
     	return this.price;
     }
-    
+    public double getLongitude() {
+    	return this.longitude;
+    }
+    public double getLatitude() {
+    	return this.latitude;
+    }
     @Override
     public String toString() {
         return this.name;
