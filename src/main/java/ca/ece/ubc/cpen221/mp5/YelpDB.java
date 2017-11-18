@@ -66,7 +66,8 @@ public class YelpDB implements MP5Db {
 
     /**
      * 
-     * @return Returns a set of all the restaurant names in the database
+     * @return Returns a copy of the set of all the restaurant business_ids in the
+     *         database
      */
     public Set<String> getRestaurantSet() {
         return new HashSet<String>(restaurantMap.keySet());
@@ -74,21 +75,22 @@ public class YelpDB implements MP5Db {
 
     /**
      * 
-     * @return Returns a set of all the review_id's in the database
+     * @return Returns a copy of the set of all the review_id's in the database
      */
     public Set<String> getReviewSet() {
-        return this.reviewMap.keySet();
+        return new HashSet<String>(reviewMap.keySet());
     }
 
     /**
-     * @return Returns a set of all user_id's in the database
+     * @return Returns a copy of the set of all user_id's in the database
      */
     public Set<String> getUserSet() {
-        return this.userMap.keySet();
+        return new HashSet<String>(this.userMap.keySet());
     }
 
     /**
-     * @param id Restaurant business id
+     * @param id
+     *            Restaurant business id
      * @return Returns the price rating of the restaurant
      */
     public int getRestaurantPrice(String id) {
@@ -122,6 +124,8 @@ public class YelpDB implements MP5Db {
     }
 
     /**
+     * Requires that the user has at least 2 unique ratings (with different
+     * rating-price combo)
      * 
      * @param user
      *            represents a user_id in the database
@@ -135,23 +139,23 @@ public class YelpDB implements MP5Db {
         List<Integer> user_ratings = new ArrayList<Integer>(); // x
         List<Integer> restaurant_price = new ArrayList<Integer>(); // y
 
-        //Construct two lists of user_ratings and restaurant_prices
+        // Construct two lists of user_ratings and restaurant_prices
         for (Review r : this.reviewMap.values()) {
             if (r.getUserId().equals(user)) {
                 user_ratings.add(r.getRating());
                 restaurant_price.add(this.restaurantMap.get(r.getBusinessId()).getPrice());
             }
         }
-        
+
         double meanX = computeMean(user_ratings);
         double meanY = computeMean(restaurant_price);
         double Sxx = computeSxx(user_ratings, meanX);
         double Syy = computeSxx(restaurant_price, meanY);
         double Sxy = computeSxy(user_ratings, meanX, restaurant_price, meanY);
-        
-        double b = Sxy/Sxx;
+
+        double b = Sxy / Sxx;
         double a = meanY - b * meanX;
-        
+
         System.out.println("User ratings:" + user_ratings);
         System.out.println("Restaurant price" + restaurant_price);
         System.out.println("MeanX:" + meanX);
@@ -160,11 +164,11 @@ public class YelpDB implements MP5Db {
         System.out.println("Sxy:" + Sxy);
         System.out.println("b:" + b);
         System.out.println("a:" + a);
-        
+
         ToDoubleBiFunction<String, YelpDB> function = (restaurantID, database) -> {
             // Function logic
             double price = database.getRestaurantPrice(restaurantID);
-            return (price - a)/b; //Need to reverse this
+            return (price - a) / b; // Need to reverse this
         };
 
         return function;

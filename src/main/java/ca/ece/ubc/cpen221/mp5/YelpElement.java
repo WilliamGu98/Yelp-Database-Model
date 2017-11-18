@@ -1,6 +1,8 @@
 package ca.ece.ubc.cpen221.mp5;
 
-//Superclass for Restaruant, Review, and User
-public class YelpElement {
+//Interface for Restaruant, Review, and User
+public interface YelpElement {
+    
+    public String toString();
 
 }
