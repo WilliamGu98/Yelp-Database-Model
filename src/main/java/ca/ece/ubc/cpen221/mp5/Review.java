@@ -1,14 +1,14 @@
 package ca.ece.ubc.cpen221.mp5;
 import java.util.*;
 
-public class Review {
-	public String type;
-	public String business_id;
-	public Map votes;
-	public String review_id;
-	public String text;
-	public int stars;
-	public String user_id;
-	public String date;
+public class Review extends YelpElement{
+	private String type;
+	private String business_id;
+	private Map votes;
+	private String review_id;
+	private String text;
+	private int stars;
+	private String user_id;
+	private String date;
 
 }
