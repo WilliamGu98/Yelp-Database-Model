@@ -3,35 +3,48 @@ Implementing YelpDB constructor:
   use Gson.fromJson(String json, class) to convert each JSON string to its respective class (restaurant, review, user)
   each class will have its own instance variables which have been parsed by JSON
   
-Methods to add to YelpDB:  
-Observer methods:  
-  getReviewList()  
-  getRestaurantList()  
-  getUserList()  
-  getRestaurant(String businessID)  
-  // least-squares regression  
-  getRestaurantPrice(Restaurant restaurant)  
-  getUser-----  
-   
-  //k-means clustering  
-  getRestaurantNeighborhood(Restaurannt restaurant)  
-  getRestaurantLongitude(Restaurant restaurant)  
-  getRestaurantLatitude(Restaurant restaurant)  
-  getDistance(Restaurant r1, Restaurant r2)    
-
-Mutator methods  
-  addReview()    
-  addUser()  
-  addRestaurant()
+Private fields of yelpDB:  
+Map of Restaurant ID (String) -> Restaurant ADT  
+Map of User ID (String) -> User ADT  
+Map of Review ID (String) -> Review ADT  
   
-Private fields of yelpDB:
-Map of Restaurant ID -> Restaurant ADT
-Map of User ID -> User ADT
-Map of Review ID -> Review ADT
+Subclassing:  
+Generic DataEntry Interface  
+  implemented by a "Business Class" and a "User Class"  
+      YelpUser extends User Class  
+      Restaurant extends Business Class   
+      Review implements DataEntry Interface  
+      
+Main ADTS:
+  Restaurant:  
+    - extends a Business class that implements Generic DataEntry Interface  
+    - contains private fields that represent a restaurant (name, address, etc.)  
+    - has observer methods for parts of its private field we might need (name, address, etc.)  
+  
+  YelpUser:
+    - extends a User class that implements Generic DataEntry Interface  
+    - contains private fields that represent a yelp user  
+    - has observer getter methods for parts of its private field we might need  
+    
+  Review:  
+    - implements Generic DataEntry Interface
+    - contains private fields that represent a review
+    - has observer methods for parts of its private field we might need  
+  
+Methods to add to YelpDB:  
+Observer methods :  
+  getAllReviews()  
+  getAllRestaurants()  
+  getAllUsers()  
+  
+  //(requires a business/user/review ID to lookup specific specific business/user/review)  
+  getRestaurant(String businessID)  
+  getReview(String reviewID)  
+  getUser(String userID)  
+  
+Mutator methods:  
+  addReview(Review obj)    
+  addUser(User obj)  
+  addRestaurant(Restaurant obj)  
 
-Subclassing stuff:
-Generic DataEntry Interface
-  extended by a "Business Interface" and a "User Interface"
-      YelpUser implements User Interface
-      Restaurant implements Business Interface
-      Review implements DataEntry Interface
+Private helper methods for implementing K-means clustering method, getPredictorFunction method, and getMatches method  
