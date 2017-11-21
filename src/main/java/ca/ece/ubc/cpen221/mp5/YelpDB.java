@@ -10,7 +10,7 @@ public class YelpDB implements MP5Db {
 
     private Map<String, Restaurant> restaurantMap; // Business_id -> Restaurant
     private Map<String, Review> reviewMap; // Review_id -> Review
-    private Map<String, User> userMap; // User_id -> User
+    private Map<String, YelpUser> userMap; // User_id -> YelpUser
 
     /**
      * Constructor
@@ -20,14 +20,14 @@ public class YelpDB implements MP5Db {
      * @param reviews
      *            name of file for list of reviews
      * @param users
-     *            name of file for list of users
+     *            name of file for list of yelp users
      */
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
 
         Gson gson = new Gson();
         this.restaurantMap = new HashMap<String, Restaurant>();
         this.reviewMap = new HashMap<String, Review>();
-        this.userMap = new HashMap<String, User>();
+        this.userMap = new HashMap<String, YelpUser>();
 
         // Process restaurants
         try (BufferedReader reader = new BufferedReader(new FileReader(restaurants))) {
@@ -53,7 +53,7 @@ public class YelpDB implements MP5Db {
         try (BufferedReader reader = new BufferedReader(new FileReader(users))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                User u = gson.fromJson(line, User.class);
+                YelpUser u = gson.fromJson(line, YelpUser.class);
                 String user_id = u.toString();
                 this.userMap.put(user_id, u);
             }
@@ -121,17 +121,13 @@ public class YelpDB implements MP5Db {
     @Override
     public String kMeansClusters_json(int k) {
 
-        Gson gson = new Gson();
-        List<Set<String>> kMeansClusters = new ArrayList<Set<String>>();
 
-        if (k == 0) {
-            return gson.toJson(kMeansClusters);
-        }
+        List<Set<String>> kMeansClusters = new ArrayList<Set<String>>();
 
         if (k == 1) {
             // No algorithm needed
             kMeansClusters.add(new HashSet<String>(this.restaurantMap.keySet()));
-            return gson.toJson(kMeansClusters);
+            return this.clusterToJSON(kMeansClusters);
         }
 
         // restaurant clusters contains random centroids mapped to a set of its closest
@@ -151,7 +147,7 @@ public class YelpDB implements MP5Db {
             kMeansClusters.add(cluster);
         }
 
-        return gson.toJson(kMeansClusters);
+        return this.clusterToJSON(kMeansClusters);
     }
 
     /**
@@ -248,7 +244,7 @@ public class YelpDB implements MP5Db {
         // Map assigns restaurants to a specific centroid
         Map<double[], Set<String>> restaurantClusters = new HashMap<double[], Set<String>>();
 
-        // Find the min and max lattitudes and longitudes
+        // Find the min and max latitudes and longitudes
         double minLat = Double.MAX_VALUE;
         double minLon = Double.MAX_VALUE;
         double maxLat = -Double.MAX_VALUE;
@@ -363,5 +359,38 @@ public class YelpDB implements MP5Db {
             centroid[1] = totalLon / size;
         }
     }
-
+    
+    //Converts a list of restaurant clusters to a string value
+    private String clusterToJSON(List<Set<String>> kMeansClusters) {
+        
+        Gson gson = new Gson();
+        List<RestaurantCluster> formattedClusters = new ArrayList<RestaurantCluster>();
+        
+        for (int i = 0; i < kMeansClusters.size(); i++) {
+            for (String rID : kMeansClusters.get(i)) {
+                Restaurant r = this.restaurantMap.get(rID);
+                RestaurantCluster cluster = new RestaurantCluster (r.getName(), i, r.getLatitude(), r.getLongitude());
+                formattedClusters.add(cluster);
+            }
+        }
+        return gson.toJson(formattedClusters);
+    }
+    
+    //Helper class
+    private class RestaurantCluster {
+        
+        private double x;
+        private double y;
+        private String name;
+        private int cluster;
+        private double weight;
+        
+        public RestaurantCluster (String name, int cluster, double lattitude, double longitude) {
+            this.name = name;
+            this.cluster = cluster;
+            this.x = lattitude;
+            this.y = longitude;
+            this.weight = 1.0; 
+        }
+    }
 }

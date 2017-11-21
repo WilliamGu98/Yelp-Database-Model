@@ -1,15 +1,13 @@
 package ca.ece.ubc.cpen221.mp5;
-import java.util.*;
 
-public class User implements YelpElement{
+public class User implements DataEntry{
     
-    private String url;
-    private Map<String,Integer> votes;
-    private int review_count;
-    private String type;
     private String user_id;
     private String name;
-    private double average_stars;
+    
+    public String getName() {
+        return this.name;
+    }
     
     @Override
     public String toString() {

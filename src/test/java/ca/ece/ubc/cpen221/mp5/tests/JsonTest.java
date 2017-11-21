@@ -25,8 +25,7 @@ public class JsonTest {
         System.out.println(func.applyAsDouble("h_we4E3zofRTf4G0JTEF0A", db)); //Price is 3
         System.out.println(func.applyAsDouble("sxIPX4ZAipVl3ZCkkqXqZw", db)); //Price is 4*/
         
-        System.out.println(db.kMeansClusters_json(5));
-        
+        System.out.println(db.kMeansClusters_json(1));
     }
     
     
