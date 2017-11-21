@@ -119,7 +119,28 @@ public class YelpDB implements MP5Db {
      */
     @Override
     public String kMeansClusters_json(int k) {
-        // TODO Auto-generated method stub
+
+        // Should first check to see if k = 0
+        if (k == 0) {
+
+        }
+
+        // restaurant clusters contains random centroids mapped to a set of restaurants
+        // initially, one centroid is mapped to all restaurants while the other
+        // centroids are mapped to none
+        Map<double[], Set<Restaurant>> restaurantClusters = this.initiateClusters(k);
+        
+        // Some form of loop here?
+        this.reassignRestaurants(restaurantClusters);
+
+        // keep alternating between:
+        // 1) shuffle the restaurants so they belong to the set with the closest
+        // centroid
+        // 2) assigning each centroid a new value based on its set of restaurants
+
+        // Before converting to json we should have a list of sets that represent the
+        // clusters
+
         return null;
     }
 
@@ -165,7 +186,7 @@ public class YelpDB implements MP5Db {
         return function;
     }
 
-    private static double computeMean(List<Integer> intList) {
+    private double computeMean(List<Integer> intList) {
         double count = 0;
         for (Integer i : intList) {
             count += i;
@@ -174,7 +195,7 @@ public class YelpDB implements MP5Db {
     }
 
     // Helper for computing Sxx and Sxy
-    private static double computeSxx(List<Integer> intList, double mean) {
+    private double computeSxx(List<Integer> intList, double mean) {
         double total = 0;
         for (Integer i : intList) {
             total += Math.pow((i - mean), 2);
@@ -183,12 +204,113 @@ public class YelpDB implements MP5Db {
     }
 
     // Requires size of intListX and intListY to be the same
-    private static double computeSxy(List<Integer> intListX, double meanX, List<Integer> intListY, double meanY) {
+    private double computeSxy(List<Integer> intListX, double meanX, List<Integer> intListY, double meanY) {
         double total = 0;
         for (int i = 0; i < intListX.size(); i++) {
             total += (intListX.get(i) - meanX) * (intListY.get(i) - meanY);
         }
         return total;
+    }
+
+    // Get the distance between a centroid and a restaurant
+    private double computeDistance(double[] centroid, Restaurant restaurant) {
+        return Math.sqrt(
+                Math.pow(centroid[0] - restaurant.getLatitude(), 2) + Math.pow(centroid[1] - restaurant.getLongitude(), 2));
+    }
+
+    // Based on min and max lattitudes and longitudes, generate a random centroid
+    private double[] generateRandomCentroid(double minLat, double maxLat, double minLon, double maxLon) {
+        Random r = new Random();
+        double randomLat = minLat + (maxLat - minLat) * r.nextDouble();
+        double randomLon = minLon + (maxLon - minLon) * r.nextDouble();
+
+        double[] centroid = new double[2];
+        centroid[0] = randomLat;
+        centroid[1] = randomLon;
+
+        return centroid;
+    }
+
+    // Initiate a number of restaurant clusters, with all restaurants beginning in
+    // one cluster
+    private Map<double[], Set<Restaurant>> initiateClusters(int k) {
+        // centroids[0] is lattitude and centroids[1] is longitude for a centroid
+        // Map assigns restaurants to a specific centroid
+        Map<double[], Set<Restaurant>> restaurantClusters = new HashMap<double[], Set<Restaurant>>();
+
+        // Find the min and max lattitudes and longitudes
+        double minLat = Double.MAX_VALUE;
+        double minLon = Double.MAX_VALUE;
+        double maxLat = Double.MIN_VALUE;
+        double maxLon = Double.MIN_VALUE;
+
+        for (Restaurant r : this.restaurantMap.values()) {
+            double lat = r.getLatitude();
+            double lon = r.getLongitude();
+            if (lat < minLat) {
+                minLat = lat;
+            }
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
+            if (lon < minLon) {
+                minLon = lon;
+            }
+            if (lon > maxLon) {
+                maxLon = lon;
+            }
+        }
+
+        // Create a number of centroids equal to k
+        for (int i = 0; i < k; i++) {
+            // Since we checked for k=0 condition, there is at least one key in restaurant
+            // clusters, so put all the restaurants in the first set we make
+            if (i == 0) {
+                HashSet<Restaurant> fullSet = new HashSet<Restaurant>(this.restaurantMap.values());
+                restaurantClusters.put(this.generateRandomCentroid(minLat, maxLat, minLon, maxLon), fullSet);
+
+            } else {
+                // For other sets, make a generate random centroid based on min and max
+                // lattitudes
+                // and longitudes, with (currently) no restaurants
+                HashSet<Restaurant> emptySet = new HashSet<Restaurant>();
+                restaurantClusters.put(this.generateRandomCentroid(minLat, maxLat, minLon, maxLon), emptySet);
+            }
+        }
+        return restaurantClusters;
+    }
+
+    // Reassigns each restaurant to its closest centroid
+    private void reassignRestaurants(Map<double[], Set<Restaurant>> restaurantClusters) {
+        // For each restaurant, go through each centroid and find which one it belongs
+        // to (old centroid)
+        // At the same time, keep track of the distances for a potential new centroid target
+        // After going through all centroids, check if old = new
+        // If not, drop the restaurant from its old centroid and put it in the new centroid
+        for (Restaurant r : this.restaurantMap.values()) {
+            double[] oldCentroid = null;
+            double[] newCentroid = null;
+            double minDist = Double.MAX_VALUE;
+            
+            for (double[] centroid : restaurantClusters.keySet()) {
+                if (restaurantClusters.get(centroid).contains(r)) {
+                    oldCentroid = centroid;
+                }
+                if (this.computeDistance(centroid, r) < minDist) {
+                    newCentroid = centroid;
+                }
+            }
+            // If old and new centroids are different, then reassian the restaurant to
+            // a different centroid
+            if (oldCentroid!=newCentroid) {
+                restaurantClusters.get(oldCentroid).remove(r);
+                restaurantClusters.get(newCentroid).add(r);
+            }
+        }
+    }
+    
+    private void reassignCentroids(Map<double[], Set<Restaurant>> restaurantClusters) {
+        
     }
 
 }
