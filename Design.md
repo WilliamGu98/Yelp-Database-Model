@@ -10,19 +10,15 @@ Observer methods:
   getUserList()  
   getRestaurant(String businessID)  
   // least-squares regression  
-  getRestaurantPriciness(Restaurant restaurant)  
+  getRestaurantPrice(Restaurant restaurant)  
   getUser-----  
-    
+   
+  //k-means clustering  
   getRestaurantNeighborhood(Restaurannt restaurant)  
   getRestaurantLongitude(Restaurant restaurant)  
   getRestaurantLatitude(Restaurant restaurant)  
-  getDistance(Restaurant r1, Restaurant r2)  
-  getNeighborhoods //this is a method we're going to use for random neighborhood selection  
-  convert list of sets to JSON format  
-  getRestaurantLongitude(Restaurant restaurant)   
-  getRestaurantLatitude(Restaurant restaurant)  
-    
-    
+  getDistance(Restaurant r1, Restaurant r2)    
+
 Mutator methods  
   addReview()    
   addUser()  
