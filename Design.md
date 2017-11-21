@@ -26,4 +26,16 @@ Observer methods:
 Mutator methods  
   addReview()    
   addUser()  
-  addRestaurant()  
+  addRestaurant()
+  
+Private fields of yelpDB:
+Map of Restaurant ID -> Restaurant ADT
+Map of User ID -> User ADT
+Map of Review ID -> Review ADT
+
+Subclassing stuff:
+Generic DataEntry Interface
+  extended by a "Business Interface" and a "User Interface"
+      YelpUser implements User Interface
+      Restaurant implements Business Interface
+      Review implements DataEntry Interface
