@@ -1,4 +1,4 @@
-package ca.ece.ubc.cpen221.mp5;
+package ca.ece.ubc.cpen221.mp5.database;
 
 import java.io.*;
 import java.util.*;
@@ -6,7 +6,7 @@ import java.util.function.ToDoubleBiFunction;
 
 import com.google.gson.*;
 
-public class YelpDB implements MP5Db {
+public class YelpDB<DataEntry> implements MP5Db {
 
     /**
      * AF: Represents a yelp database that includes lookup tables for the
@@ -133,7 +133,7 @@ public class YelpDB implements MP5Db {
      * @return the set of objects that matches the query
      */
     @Override
-    public Set getMatches(String queryString) {
+    public Set<DataEntry> getMatches(String queryString) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -190,7 +190,7 @@ public class YelpDB implements MP5Db {
      *         represents the id of an object of type T.
      */
     @Override
-    public ToDoubleBiFunction getPredictorFunction(String user) {
+    public ToDoubleBiFunction<YelpDB<DataEntry>, String> getPredictorFunction(String user) {
         List<Integer> user_ratings = new ArrayList<Integer>(); // x
         List<Integer> restaurant_price = new ArrayList<Integer>(); // y
 
@@ -210,7 +210,7 @@ public class YelpDB implements MP5Db {
         double b = Sxy / Sxx;
         double a = meanY - b * meanX;
 
-        ToDoubleBiFunction<String, YelpDB> function = (restaurantID, database) -> {
+        ToDoubleBiFunction<YelpDB<DataEntry>, String> function = (database, restaurantID) -> {
             // Function logic
             double price = database.getRestaurant(restaurantID).getPrice();
             return a + b * price;
@@ -470,6 +470,7 @@ public class YelpDB implements MP5Db {
 
     /**
      * Converts a list of restaurant clusters to its a string in JSON format
+     * 
      * @param kMeansClusters
      * @return a string that represents the clusters, in JSON format
      */

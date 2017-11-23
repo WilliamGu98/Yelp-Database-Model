@@ -1,10 +1,10 @@
 package ca.ece.ubc.cpen221.mp5.tests;
 
-import ca.ece.ubc.cpen221.mp5.*;
-
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import ca.ece.ubc.cpen221.mp5.database.*;
 
 import java.io.*;
 import java.util.*;
