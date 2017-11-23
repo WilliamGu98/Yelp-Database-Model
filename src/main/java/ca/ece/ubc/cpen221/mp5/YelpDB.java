@@ -8,19 +8,28 @@ import com.google.gson.*;
 
 public class YelpDB implements MP5Db {
 
-    private Map<String, Restaurant> restaurantMap; // Business_id -> Restaurant
-    private Map<String, Review> reviewMap; // Review_id -> Review
-    private Map<String, YelpUser> userMap; // User_id -> YelpUser
+    /**
+     * AF: Represents a yelp database that includes lookup tables for the
+     * restaurants, reviews, and users included in the database. The database also
+     * supports several operations
+     */
+
+    private Map<String, Restaurant> restaurantMap; // Maps a Business_id -> Restaurant. The business id should match
+                                                   // that of the restaurant
+    private Map<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of the review
+    private Map<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that of the user
+                                           // id
 
     /**
-     * Constructor
+     * Constructor for a yelp database
      * 
      * @param restaurants
-     *            name of file for list of restaurants
+     *            name of file for list of restaurants in JSON format
      * @param reviews
-     *            name of file for list of reviews
+     *            name of file for list of reviews in JSON format
      * @param users
-     *            name of file for list of yelp users
+     *            name of file for list of yelp users in JSON format
+     * @throws IOException if there is an error opening one of the files
      */
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
 
@@ -60,12 +69,40 @@ public class YelpDB implements MP5Db {
         }
     }
 
-    public void addReview() {
-
-    }
-
     /**
+     * Lookup a specific restaurant given its ID
      * 
+     * @param rID
+     *      the ID of the restaurant to lookup
+     * @return the restaurant that matches rID
+     */
+    public Restaurant getRestaurant(String rID) {
+        return this.restaurantMap.get(rID);
+    }
+    
+    /**
+     * Lookup a specific review given its ID
+     * 
+     * @param rID
+     *      the ID of the review to lookup
+     * @return the review that matches rID
+     */
+    public Review getReview(String rID) {
+        return this.reviewMap.get(rID);
+    }
+    
+    /**
+     * Lookup a specific yelp user given its ID
+     * 
+     * @param uID
+     *      the ID of the user to lookup
+     * @return the yelp user that matches uID
+     */
+    public YelpUser getYelpUser(String uID) {
+        return this.userMap.get(uID);
+    }
+    
+    /**
      * @return Returns a copy of the set of all the restaurant business_ids in the
      *         database
      */
@@ -74,7 +111,6 @@ public class YelpDB implements MP5Db {
     }
 
     /**
-     * 
      * @return Returns a copy of the set of all the review_id's in the database
      */
     public Set<String> getReviewSet() {
@@ -86,15 +122,6 @@ public class YelpDB implements MP5Db {
      */
     public Set<String> getUserSet() {
         return new HashSet<String>(this.userMap.keySet());
-    }
-
-    /**
-     * @param id
-     *            Restaurant business id
-     * @return Returns the price rating of the restaurant
-     */
-    public int getRestaurantPrice(String id) {
-        return this.restaurantMap.get(id).getPrice();
     }
 
     /**
@@ -112,15 +139,15 @@ public class YelpDB implements MP5Db {
 
     /**
      * Cluster objects into k clusters using k-means clustering. The resulting
-     * clusters are restaurants identified by their business ID.
-     * If k = 0, then no clusters are created
+     * clusters are restaurants identified by their business ID. If k = 0, then no
+     * clusters are created
+     * 
      * @param k
      *            number of clusters to create (0 < k <= number of objects)
      * @return a String, in JSON format, that represents the clusters
      */
     @Override
     public String kMeansClusters_json(int k) {
-
 
         List<Set<String>> kMeansClusters = new ArrayList<Set<String>>();
 
@@ -177,7 +204,6 @@ public class YelpDB implements MP5Db {
         double meanX = computeMean(restaurant_price);
         double meanY = computeMean(user_ratings);
         double Sxx = computeSxx(restaurant_price, meanX);
-        double Syy = computeSxx(user_ratings, meanY);
         double Sxy = computeSxy(restaurant_price, meanX, user_ratings, meanY);
 
         double b = Sxy / Sxx;
@@ -185,7 +211,7 @@ public class YelpDB implements MP5Db {
 
         ToDoubleBiFunction<String, YelpDB> function = (restaurantID, database) -> {
             // Function logic
-            double price = database.getRestaurantPrice(restaurantID);
+            double price = database.getRestaurant(restaurantID).getPrice();
             return a + b * price;
         };
 
@@ -306,7 +332,7 @@ public class YelpDB implements MP5Db {
 
         for (String rID : this.restaurantMap.keySet()) {
             Restaurant r = this.restaurantMap.get(rID);
-            
+
             double[] oldCentroid = null;
             double[] newCentroid = null;
             double minDist = Double.MAX_VALUE;
@@ -359,38 +385,38 @@ public class YelpDB implements MP5Db {
             centroid[1] = totalLon / size;
         }
     }
-    
-    //Converts a list of restaurant clusters to a string value
+
+    // Converts a list of restaurant clusters to a string value
     private String clusterToJSON(List<Set<String>> kMeansClusters) {
-        
+
         Gson gson = new Gson();
         List<RestaurantCluster> formattedClusters = new ArrayList<RestaurantCluster>();
-        
+
         for (int i = 0; i < kMeansClusters.size(); i++) {
             for (String rID : kMeansClusters.get(i)) {
                 Restaurant r = this.restaurantMap.get(rID);
-                RestaurantCluster cluster = new RestaurantCluster (r.getName(), i, r.getLatitude(), r.getLongitude());
+                RestaurantCluster cluster = new RestaurantCluster(r.getName(), i, r.getLatitude(), r.getLongitude());
                 formattedClusters.add(cluster);
             }
         }
         return gson.toJson(formattedClusters);
     }
-    
-    //Helper class
+
+    // Helper class
     private class RestaurantCluster {
-        
+
         private double x;
         private double y;
         private String name;
         private int cluster;
         private double weight;
-        
-        public RestaurantCluster (String name, int cluster, double lattitude, double longitude) {
+
+        public RestaurantCluster(String name, int cluster, double lattitude, double longitude) {
             this.name = name;
             this.cluster = cluster;
             this.x = lattitude;
             this.y = longitude;
-            this.weight = 1.0; 
+            this.weight = 1.0;
         }
     }
 }

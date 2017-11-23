@@ -24,24 +24,4 @@ public class JsonTest {
         
         System.out.println(db.kMeansClusters_json(1));
     }
-    
-    
-    //@Test
-    public void test1() throws IOException{
-        List<StringBuilder> list1 = new ArrayList<StringBuilder>();
-        StringBuilder one = new StringBuilder("1");
-        StringBuilder two = new StringBuilder("2");
-        list1.add(one);
-        list1.add(two);
-        
-        System.out.println(list1);
-        List<StringBuilder> list2 = new ArrayList<StringBuilder>(list1);
-        System.out.println(list2);
-        
-        one.append("3");
-        System.out.println(list1);
-        list2.add(new StringBuilder("4"));
-        System.out.println(list2); 
-    }
-
 }
