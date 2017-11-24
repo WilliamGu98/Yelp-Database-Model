@@ -16,8 +16,7 @@ public class User implements DataEntry{
     
     @Override
     public int hashCode() {
-        return this.user_id.hashCode();
-        
+        return this.user_id.hashCode(); 
     }
     
     @Override

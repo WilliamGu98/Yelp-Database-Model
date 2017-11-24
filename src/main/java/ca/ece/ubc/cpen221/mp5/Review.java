@@ -1,39 +1,52 @@
 package ca.ece.ubc.cpen221.mp5;
+
 import java.util.*;
 
-public class Review implements DataEntry{
+public class Review implements DataEntry {
     private String review_id;
-	private String type;
-	private String business_id;
-	private Map votes;
-	private String text;
-	private int stars;
-	private String user_id;
-	private String date;
-	
-	public String getUserId() {
-	    return this.user_id;
-	}
-	
-	public int getRating() {
-	    return stars;
-	}
-	
-	public String getBusinessId() {
-	    return business_id;
-	}
-	
+    private String type;
+    private String business_id;
+    private Map votes;
+    private String text;
+    private int stars;
+    private String user_id;
+    private String date;
+
+    public String getUserId() {
+        return this.user_id;
+    }
+
+    public int getRating() {
+        return this.stars;
+    }
+
+    public String getBusinessId() {
+        return this.business_id;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getText() {
+        return this.text;
+    }
+
+    public String getDate() {
+        return this.date;
+    }
+
     @Override
     public String toString() {
         return this.review_id;
     }
-    
+
     @Override
     public int hashCode() {
         return this.review_id.hashCode();
-        
+
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

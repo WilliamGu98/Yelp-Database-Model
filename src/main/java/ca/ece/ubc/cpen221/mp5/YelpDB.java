@@ -6,21 +6,31 @@ import java.util.function.ToDoubleBiFunction;
 
 import com.google.gson.*;
 
-public class YelpDB implements MP5Db {
-
-    private Map<String, Restaurant> restaurantMap; // Business_id -> Restaurant
-    private Map<String, Review> reviewMap; // Review_id -> Review
-    private Map<String, YelpUser> userMap; // User_id -> YelpUser
+public class YelpDB<DataEntry> implements MP5Db {
 
     /**
-     * Constructor
+     * AF: Represents a yelp database that includes lookup tables for the
+     * restaurants, reviews, and users included in the database. The database also
+     * supports several operations
+     */
+
+    private Map<String, Restaurant> restaurantMap; // Maps a Business_id -> Restaurant. The business id should match
+                                                   // that of the restaurant
+    private Map<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of the review
+    private Map<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that of the user
+                                           // id
+
+    /**
+     * Constructor for a yelp database
      * 
      * @param restaurants
-     *            name of file for list of restaurants
+     *            name of file for list of restaurants in JSON format
      * @param reviews
-     *            name of file for list of reviews
+     *            name of file for list of reviews in JSON format
      * @param users
-     *            name of file for list of yelp users
+     *            name of file for list of yelp users in JSON format
+     * @throws IOException
+     *             if there is an error opening one of the files
      */
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
 
@@ -60,12 +70,40 @@ public class YelpDB implements MP5Db {
         }
     }
 
-    public void addReview() {
-
+    /**
+     * Lookup a specific restaurant given its ID
+     * 
+     * @param rID
+     *            the ID of the restaurant to lookup
+     * @return the restaurant that matches rID
+     */
+    public Restaurant getRestaurant(String rID) {
+        return this.restaurantMap.get(rID);
     }
 
     /**
+     * Lookup a specific review given its ID
      * 
+     * @param rID
+     *            the ID of the review to lookup
+     * @return the review that matches rID
+     */
+    public Review getReview(String rID) {
+        return this.reviewMap.get(rID);
+    }
+
+    /**
+     * Lookup a specific yelp user given its ID
+     * 
+     * @param uID
+     *            the ID of the user to lookup
+     * @return the yelp user that matches uID
+     */
+    public YelpUser getYelpUser(String uID) {
+        return this.userMap.get(uID);
+    }
+
+    /**
      * @return Returns a copy of the set of all the restaurant business_ids in the
      *         database
      */
@@ -74,7 +112,6 @@ public class YelpDB implements MP5Db {
     }
 
     /**
-     * 
      * @return Returns a copy of the set of all the review_id's in the database
      */
     public Set<String> getReviewSet() {
@@ -89,15 +126,6 @@ public class YelpDB implements MP5Db {
     }
 
     /**
-     * @param id
-     *            Restaurant business id
-     * @return Returns the price rating of the restaurant
-     */
-    public int getRestaurantPrice(String id) {
-        return this.restaurantMap.get(id).getPrice();
-    }
-
-    /**
      * Perform a structured query and return the set of objects that matches the
      * query
      * 
@@ -105,22 +133,22 @@ public class YelpDB implements MP5Db {
      * @return the set of objects that matches the query
      */
     @Override
-    public Set getMatches(String queryString) {
+    public Set<DataEntry> getMatches(String queryString) {
         // TODO Auto-generated method stub
         return null;
     }
 
     /**
      * Cluster objects into k clusters using k-means clustering. The resulting
-     * clusters are restaurants identified by their business ID.
-     * If k = 0, then no clusters are created
+     * clusters are restaurants identified by their business ID. If k = 0, then no
+     * clusters are created
+     * 
      * @param k
      *            number of clusters to create (0 < k <= number of objects)
      * @return a String, in JSON format, that represents the clusters
      */
     @Override
     public String kMeansClusters_json(int k) {
-
 
         List<Set<String>> kMeansClusters = new ArrayList<Set<String>>();
 
@@ -162,7 +190,7 @@ public class YelpDB implements MP5Db {
      *         represents the id of an object of type T.
      */
     @Override
-    public ToDoubleBiFunction getPredictorFunction(String user) {
+    public ToDoubleBiFunction<YelpDB<DataEntry>, String> getPredictorFunction(String user) {
         List<Integer> user_ratings = new ArrayList<Integer>(); // x
         List<Integer> restaurant_price = new ArrayList<Integer>(); // y
 
@@ -177,21 +205,29 @@ public class YelpDB implements MP5Db {
         double meanX = computeMean(restaurant_price);
         double meanY = computeMean(user_ratings);
         double Sxx = computeSxx(restaurant_price, meanX);
-        double Syy = computeSxx(user_ratings, meanY);
         double Sxy = computeSxy(restaurant_price, meanX, user_ratings, meanY);
 
         double b = Sxy / Sxx;
         double a = meanY - b * meanX;
 
-        ToDoubleBiFunction<String, YelpDB> function = (restaurantID, database) -> {
+        ToDoubleBiFunction<YelpDB<DataEntry>, String> function = (database, restaurantID) -> {
             // Function logic
-            double price = database.getRestaurantPrice(restaurantID);
+            double price = database.getRestaurant(restaurantID).getPrice();
             return a + b * price;
         };
 
         return function;
     }
 
+    /** HELPER METHODS **/
+
+    /**
+     * Helper method to compute the mean of the integers in a given list
+     * 
+     * @param intList
+     *            list of integers where no integers in the list are null
+     * @return the mean of the integers in intList
+     */
     private double computeMean(List<Integer> intList) {
         double count = 0;
         for (Integer i : intList) {
@@ -200,7 +236,17 @@ public class YelpDB implements MP5Db {
         return count / intList.size();
     }
 
-    // Helper for computing Sxx and Sxy
+    /**
+     * Helper method for computing Sxx, where Sxx = SUMi of (xi-mean(x))^2
+     * 
+     * @param intList
+     *            list of integers where each integer represents xi, where x is the
+     *            integer and i is the index of the integer. requires that no
+     *            integers are null
+     * @param mean
+     *            the mean value of the integers in the list
+     * @return Sxx for the integers in the list
+     */
     private double computeSxx(List<Integer> intList, double mean) {
         double total = 0;
         for (Integer i : intList) {
@@ -209,7 +255,24 @@ public class YelpDB implements MP5Db {
         return total;
     }
 
-    // Requires size of intListX and intListY to be the same
+    /**
+     * Helper method for computing Sxy, where Sxy = SUMi of (xi-mean(x))(yi-mean(y))
+     * 
+     * @param intListX
+     *            list of integers where each integer represents xi, where x is the
+     *            integer and i is the index of the integer. requires that no
+     *            integers are null
+     * @param meanX
+     *            the mean value of the integers in intListX
+     * @param intListY
+     *            list of integers where each integer represents yi, where y is the
+     *            integer and y is the index of the integer. requires that no
+     *            integers are null
+     * @param meanY
+     *            the mean value of the integers in intListY
+     * @requires that intListX and intListY have the same size
+     * @return Sxy for the integers from the combined list
+     */
     private double computeSxy(List<Integer> intListX, double meanX, List<Integer> intListY, double meanY) {
         double total = 0;
         for (int i = 0; i < intListX.size(); i++) {
@@ -218,13 +281,37 @@ public class YelpDB implements MP5Db {
         return total;
     }
 
-    // Get the distance between a centroid and a restaurant
+    /**
+     * Helper method for computing the distance between a centroid and a restaurant
+     * 
+     * @param centroid
+     *            where centroid[0] represents an x coordinate and centroid[1]
+     *            represents a y coordinate. requires that both these elements are
+     *            not null.
+     * @param restaurant
+     *            with a valid latitude (x) and longitude (y)
+     * @return the direct distance between the two points
+     */
     private double computeDistance(double[] centroid, Restaurant restaurant) {
         return Math.sqrt(Math.pow(centroid[0] - restaurant.getLatitude(), 2)
                 + Math.pow(centroid[1] - restaurant.getLongitude(), 2));
     }
 
-    // Based on min and max lattitudes and longitudes, generate a random centroid
+    /**
+     * Helper method for generating a random centroid given a certain valid latitude
+     * (x) and longitude (y) domain and range
+     * 
+     * @param minLat
+     *            minimum latitude of the random centroid
+     * @param maxLat
+     *            maximum latitude of the random centroid
+     * @param minLon
+     *            minimum longitude of the random centroid
+     * @param maxLon
+     *            maximum longitude of the random centroid
+     * @return a two element double array where the 0th element is the random
+     *         lattitude and the 1st element is the random longitude
+     */
     private double[] generateRandomCentroid(double minLat, double maxLat, double minLon, double maxLon) {
         Random r = new Random();
         double randomLat = minLat + (maxLat - minLat) * r.nextDouble();
@@ -237,8 +324,19 @@ public class YelpDB implements MP5Db {
         return centroid;
     }
 
-    // Initiate a number of restaurant clusters, with all restaurants assigned
-    // to its closest random initial centroid
+    /**
+     * Helper method for initiating k restaurant clusters, where k random centroids
+     * are generated within the smallest square area that includes all the
+     * restaurants in this database. Each restaurant in this database is assigned to
+     * the closest centroid that was generated.
+     * 
+     * @param k
+     *            number of clusters to generate. k should be greater than 0
+     * @return a map where the keys represent centroids and the values represent a
+     *         set of strings where each string represents one of the restaurants in
+     *         the database with its ID. each unique restaurant is mapped by exactly
+     *         one centroid
+     */
     private Map<double[], Set<String>> initiateClusters(int k) {
         // centroids[0] is lattitude and centroids[1] is longitude for a centroid
         // Map assigns restaurants to a specific centroid
@@ -292,21 +390,25 @@ public class YelpDB implements MP5Db {
         return restaurantClusters;
     }
 
-    // Reassigns each restaurant to its closest centroid
-    // Return true if anything is changed, false otherwise
+    /**
+     * Reassigns each restaurant to its closest centroid
+     * 
+     * @param restaurantClusters
+     *            is a map that represents the existing centroid -> restaurant
+     *            mappings
+     * @return true if at least one restaurant is reassigned and false if 0
+     *         restaurants are reassigned
+     */
     private boolean reassignRestaurants(Map<double[], Set<String>> restaurantClusters) {
         // For each restaurant, go through each centroid and find which one it belongs
         // to (old centroid)
         // At the same time, keep track of the distances for a potential new centroid
         // target
-        // After going through all centroids, check if old = new
-        // If not, drop the restaurant from its old centroid and put it in the new
-        // centroid
         boolean flag = false;
 
         for (String rID : this.restaurantMap.keySet()) {
             Restaurant r = this.restaurantMap.get(rID);
-            
+
             double[] oldCentroid = null;
             double[] newCentroid = null;
             double minDist = Double.MAX_VALUE;
@@ -332,8 +434,14 @@ public class YelpDB implements MP5Db {
         return flag;
     }
 
-    // Reassigns each centroid based on the mean value of the coordinates of the
-    // restaurants in its cluster
+    /**
+     * Re-evaluates each centroid based on the mean value of the coordinates of the
+     * restaurants in its cluster
+     * 
+     * @param restaurantClusters
+     *            is a map that represents the existing centroid -> restaurant
+     *            mappings
+     */
     private void reassignCentroids(Map<double[], Set<String>> restaurantClusters) {
 
         for (double[] centroid : restaurantClusters.keySet()) {
@@ -359,38 +467,45 @@ public class YelpDB implements MP5Db {
             centroid[1] = totalLon / size;
         }
     }
-    
-    //Converts a list of restaurant clusters to a string value
+
+    /**
+     * Converts a list of restaurant clusters to its a string in JSON format
+     * 
+     * @param kMeansClusters
+     * @return a string that represents the clusters, in JSON format
+     */
     private String clusterToJSON(List<Set<String>> kMeansClusters) {
-        
+
         Gson gson = new Gson();
         List<RestaurantCluster> formattedClusters = new ArrayList<RestaurantCluster>();
-        
+
         for (int i = 0; i < kMeansClusters.size(); i++) {
             for (String rID : kMeansClusters.get(i)) {
                 Restaurant r = this.restaurantMap.get(rID);
-                RestaurantCluster cluster = new RestaurantCluster (r.getName(), i, r.getLatitude(), r.getLongitude());
+                RestaurantCluster cluster = new RestaurantCluster(r.getName(), i, r.getLatitude(), r.getLongitude());
                 formattedClusters.add(cluster);
             }
         }
         return gson.toJson(formattedClusters);
     }
-    
-    //Helper class
+
+    /**
+     * Helper class to convert restaurant clusters to JSON format
+     */
     private class RestaurantCluster {
-        
+
         private double x;
         private double y;
         private String name;
         private int cluster;
         private double weight;
-        
-        public RestaurantCluster (String name, int cluster, double lattitude, double longitude) {
+
+        public RestaurantCluster(String name, int cluster, double lattitude, double longitude) {
             this.name = name;
             this.cluster = cluster;
             this.x = lattitude;
             this.y = longitude;
-            this.weight = 1.0; 
+            this.weight = 1.0;
         }
     }
 }
