@@ -1,4 +1,4 @@
-package ca.ece.ubc.cpen221.mp5.database;
+package ca.ece.ubc.cpen221.mp5;
 
 // This interface represents a generic data entry for a database
 
