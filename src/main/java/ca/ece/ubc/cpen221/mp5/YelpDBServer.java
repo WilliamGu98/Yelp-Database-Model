@@ -137,21 +137,19 @@ public class YelpDBServer {
         //GETRESTAURANT <business id>
         //ADDUSER <user info>
         //ADDRESTAURANT <restaurant info>
-        //ADDREVIEW <review info>
-        
+        //ADDREVIEW <review info>      
         
         return null;
     }
 
 
     /**
-     * Start a FibonacciServerMulti running on the default port.
+     * Start a FibonacciServerMulti running on some port.
      */
     public static void main(String[] args) {
         try {
             int portNum = Integer.parseInt(args[0]);
-            YelpDBServer server = new YelpDBServer(
-                    portNum);
+            YelpDBServer server = new YelpDBServer(portNum);
             server.serve();
         } catch (IOException e) {
             e.printStackTrace();
