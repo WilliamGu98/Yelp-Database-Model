@@ -66,15 +66,21 @@ public class YelpDBClient {
      */
     public static void main(String[] args) {
         try {
-            int portNum = Integer.parseInt(args[0]);
+            int portNum = 7777;
             YelpDBClient client = new YelpDBClient("localhost", portNum);
 
-            String request = "GETRESTAURANT h_we4E3zofRTf4G0JTEF0A";
+            String request1 = "GETRESTAURANT h_we4E3zofRTf4G0JTEF0A";
+            String request2 = "ADDUSER {\"name\": \"Jim\"}";
             
-            client.sendRequest(request);
-            System.out.println(request);
-            String reply = client.getReply();
-            System.out.println(reply);     
+            client.sendRequest(request1);
+            System.out.println(request1);
+            String reply1 = client.getReply();
+            System.out.println(reply1); 
+            
+            client.sendRequest(request2);
+            System.out.println(request2);
+            String reply2 = client.getReply();
+            System.out.println(reply2); 
             
             client.close();
         } catch (IOException ioe) {
