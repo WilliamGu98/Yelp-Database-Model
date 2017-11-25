@@ -149,6 +149,7 @@ public class YelpDBServer {
     	}
     	else if (command.equals("ADDUSER")) {
     		
+    		
     	}
     	else if (command.equals("ADDRESTAURANT")) {
     		

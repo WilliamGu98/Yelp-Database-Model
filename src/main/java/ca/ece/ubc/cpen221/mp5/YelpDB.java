@@ -201,6 +201,11 @@ public class YelpDB<DataEntry> implements MP5Db {
     
     /** Methods for Server **/
     
+    /**
+     * 
+     * @param rID
+     * @return returns a string in JSON format of the restaurant info
+     */
     public String getRestaurantJSON(String rID) {        
         return gson.toJson(this.restaurantMap.get(rID));
     }

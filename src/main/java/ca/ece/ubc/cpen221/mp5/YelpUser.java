@@ -25,4 +25,12 @@ public class YelpUser extends User{
     public double getAverageStars() {
         return this.average_stars;
     }
+    public void constructNew(YelpDB db) {
+    	this.url = "";
+    	this.votes = null;
+    	this.review_count = 0;
+    	this.type = "user";
+    	this.average_stars = 0.0;
+    	this.user_id = ;
+    }
 }
