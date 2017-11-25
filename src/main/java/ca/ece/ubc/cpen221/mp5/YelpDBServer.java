@@ -137,9 +137,33 @@ public class YelpDBServer {
         //GETRESTAURANT <business id>
         //ADDUSER <user info>
         //ADDRESTAURANT <restaurant info>
-        //ADDREVIEW <review info>      
-        
-        return null;
+
+        //ADDREVIEW <review info>
+    	
+    	int split = input.indexOf(" ");
+    	String command = input.substring(0, split +1);
+    	String response;
+    	
+    	if (command.equals("GETRESTAURANT")) {
+    		String bID = input.substring(split +1, input.length() +1);  // is length +1 necessary?
+    		response = yelpDB.getRestaurantJSON(bID);
+    	}
+    	else if (command.equals("ADDUSER")) {
+    		
+    	}
+    	else if (command.equals("ADDRESTAURANT")) {
+    		
+    	}
+    	else if (command.equals("ADDREVIEW")) {
+    		
+    	}
+    	else {
+    		response = "ERR: ILLEGAL_REQUEST";
+
+    	}
+    	return response;
+
+
     }
 
 
