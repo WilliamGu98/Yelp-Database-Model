@@ -20,8 +20,7 @@ public class YelpDB<DataEntry> implements MP5Db {
     private ConcurrentMap<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of
                                                      // the review
     private ConcurrentMap<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that
-                                                     // of the user
-    // id
+                                                     // of the user id
     Gson gson; // For JSON parsing
 
     /**
@@ -203,31 +202,51 @@ public class YelpDB<DataEntry> implements MP5Db {
 
     /** Methods for Server **/
 
-    
     /**
      * 
      * @param rID
      * @return returns a string in JSON format of the restaurant info
      */
-    public String getRestaurantJSON(String rID) {        
+    public String getRestaurantJSON(String rID) {
 
         return gson.toJson(this.restaurantMap.get(rID));
     }
 
-    public String addUser(String jsonInfo) {
+    /**
+     * Adds a new user to the database given user info in json format
+     * 
+     * @param jsonInfo
+     *            string in json format that represents new user
+     * @return the json format of the newly added user
+     * @throws JsonSyntaxException
+     *             if jsonInfo is not in json format or if the name field is null
+     */
+    public String addUserJSON(String jsonInfo) throws JsonSyntaxException {
         YelpUser user = gson.fromJson(jsonInfo, YelpUser.class);
-
-        // We need to only create "new" fields for the yelpuser if
-        // it is not included in jsonInfo
-        // How to do this?
-        // Also need to randomize a user id and a url
-        // We could add a method that does this? Or do we change constructor?
-
-        return null; // Return jsonInfo of completed user (with all fields filled)
+        if (user.getName() == null) {
+            // Exception thrown if name is null
+            throw new JsonSyntaxException(jsonInfo);
+        }
+        // Add new user fields (such as user_id, url, votes, etc.)
+        // The method also adds the user to this database
+        user.addNewUser(this);
+        return gson.toJson(user); // Return jsonInfo of completed user (with all fields filled)
     }
 
-    public String addRestaurant(String jsonInfo) {
-        return null;
+    /**
+     * Adds a new restaurant to the database given restaurant info in json format
+     * 
+     * @param jsonInfo
+     * @return
+     */
+    public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
+        Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
+        if (rest.getCity() == null || rest.getState() == null || rest.getName() == null
+                || rest.getFullAddress() == null) {
+            throw new JsonSyntaxException(jsonInfo);
+        }
+
+        return gson.toJson(rest);
     }
 
     public String addReview(String jsonInfo) {
@@ -522,5 +541,39 @@ public class YelpDB<DataEntry> implements MP5Db {
             this.y = longitude;
             this.weight = 1.0;
         }
+    }
+
+    /**
+     * Generates a new user ID and puts it in the database along with the given user
+     * 
+     * @return the new user id
+     */
+    protected String addUser(YelpUser user) {
+        Random r = new Random();
+
+        String userID;
+        do {
+            int randomIDnum = 1 + (2000000) * r.nextInt();
+            userID = String.valueOf(randomIDnum);
+        } while (!this.userMap.containsKey(userID));
+        this.userMap.put(userID, user);
+        return userID;
+    }
+    
+    /**
+     * Generates a new restaurant ID and puts it in the database along with the given restaurant
+     * 
+     * @return the new restaurant id
+     */
+    protected String addRestaurant(Restaurant rest) {
+        Random r = new Random();
+
+        String restID;
+        do {
+            int randomIDnum = 1 + (2000000) * r.nextInt();
+            restID = String.valueOf(randomIDnum);
+        } while (!this.restaurantMap.containsKey(restID));
+        this.restaurantMap.put(restID, rest);
+        return restID;
     }
 }

@@ -1,6 +1,7 @@
 package ca.ece.ubc.cpen221.mp5;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Restaurant extends Business {
 
@@ -12,21 +13,21 @@ public class Restaurant extends Business {
      * restaurant's url, its rating in stars, the city it's in, etc.
      */
 
-    private boolean open;
-    private String url; // Is in valid url format
-    private String photo_url; // Is in valid url format
-    private String[] neighborhoods; // Has at least one neighborhood entry that is exists in the city/location its
+    protected boolean open;
+    protected String url; // Is in valid url format
+    protected String photo_url; // Is in valid url format
+    protected String[] neighborhoods; // Has at least one neighborhood entry that is exists in the city/location its
                                     // in
-    private String[] categories; // Category entries must be one of predetermined categories (i.e. chinese,
+    protected String[] categories; // Category entries must be one of predetermined categories (i.e. chinese,
                                  // indian, etc.)
-    private String state; // Must be one of the 50 states in the US, in abbrev. format
-    private String type; // Must be a business
-    private double stars; // Must be a double between 1 and 5 inclusive, with only 0.5 increments
-    private String city; // Must be a valid city in the restaurant's state
-    private int review_count; // The number of reviews for the restaurant, and should match the number of
+    protected String state; // Must be one of the 50 states in the US, in abbrev. format
+    protected String type; // Must be a business
+    protected double stars; // Must be a double between 1 and 5 inclusive, with only 0.5 increments
+    protected String city; // Must be a valid city in the restaurant's state
+    protected int review_count; // The number of reviews for the restaurant, and should match the number of
                               // review data entries in the same database
-    private String[] schools; 
-    private int price; // An integer between 1 and 5, inclusive
+    protected String[] schools;
+    protected int price; // An integer between 1 and 5, inclusive
 
     public boolean isOpen() {
         return this.open;
@@ -74,5 +75,11 @@ public class Restaurant extends Business {
 
     public int getPrice() {
         return this.price;
+    }
+    
+    public void addNewRestaurant(YelpDB db) {
+        this.type = "business";
+        this.business_id = db.addRestaurant(this);
+        this.url = "http://www.yelp.com/restaurant_details?businessid=" + this.business_id;
     }
 }

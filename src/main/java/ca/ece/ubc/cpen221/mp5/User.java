@@ -2,8 +2,8 @@ package ca.ece.ubc.cpen221.mp5;
 
 public class User implements DataEntry{
     
-    private String user_id;
-    private String name;
+    protected String user_id;
+    protected String name;
     
     public String getName() {
         return this.name;
