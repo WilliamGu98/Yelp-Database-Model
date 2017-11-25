@@ -8,11 +8,11 @@ public class Business implements DataEntry {
      * coordinates, its full address, and a unique id.
      */
 
-    private String name;
-    private double longitude; // Must be between -180 and 180
-    private double latitude; // Must be between -180 and 180
-    private String full_address; // Must be in the format of an address in the real world
-    private String business_id; // For a given business, the id should be unique and not shared with any other
+    protected String name;
+    protected double longitude; // Must be between -180 and 180
+    protected double latitude; // Must be between -90 and 90
+    protected String full_address; // Must be in the format of an address in the real world
+    protected String business_id; // For a given business, the id should be unique and not shared with any other
                                 // business
 
     /**

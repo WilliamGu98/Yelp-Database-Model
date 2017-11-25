@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * FibonacciServerMulti is a server that finds the n^th Fibonacci number given
  * n. It accepts requests of the form: Request ::= Number "\n" Number ::= [0-9]+
@@ -15,16 +17,9 @@ import java.net.Socket;
 public class YelpDBServer {
 
     private ServerSocket serverSocket;
-    private YelpDB yelpDB; //Wraps a yelp database
+    private YelpDB yelpDB; // Wraps a yelp database
 
     // Rep invariant: serverSocket != null
-    //
-    // Thread safety argument:
-    // TODO FIBONACCI_PORT
-    // TODO serverSocket
-    // TODO socket objects
-    // TODO readers and writers in handle()
-    // TODO data in handle()
 
     /**
      * Make a FibonacciServerMulti that listens for connections on port.
@@ -34,7 +29,7 @@ public class YelpDBServer {
      */
     public YelpDBServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        this.yelpDB = new YelpDB ("data/restaurants.json", "data/reviews.json", "data/users.json");
+        this.yelpDB = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
     }
 
     /**
@@ -83,35 +78,24 @@ public class YelpDBServer {
         // get the socket's input stream, and wrap converters around it
         // that convert it from a byte stream to a character stream,
         // and that buffer it so that we can read a line at a time
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                socket.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         // similarly, wrap character=>bytestream converter around the
         // socket output stream, and wrap a PrintWriter around that so
         // that we have more convenient ways to write Java primitive
         // types to it.
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(
-                socket.getOutputStream()), true);
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
 
         try {
             // each request is a single line containing a number
-            for (String line = in.readLine(); line != null; line = in
-                    .readLine()) {
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
                 System.err.println("request: " + line);
-                try {
-                    // compute answer and send back to client
-                    
-                    // Check what the request is and respond accordingly
-                    String response = requestParser(line);
-                    
-                    
-                    System.err.println("reply: " + response);
-                    out.println(response);
-                } catch (NumberFormatException e) {
-                    // complain about ill-formatted request
-                    System.err.println("reply: err");
-                    out.print("err\n");
-                }
+
+                // Check what the request is and respond accordingly
+                String response = requestParser(line);
+                System.err.println("reply: " + response);
+                out.println(response);
+
                 // important! our PrintWriter is auto-flushing, but if it were
                 // not:
                 // out.flush();
@@ -121,46 +105,45 @@ public class YelpDBServer {
             in.close();
         }
     }
-    
+
     /**
      * Parses a request from a client (there are 5 different possible requests)
-     * @param input from client
+     * 
+     * @param input
+     *            from client
      * @return a response from the server
      */
     public String requestParser(String input) {
-        
-        //Possible requests:
-        //GETRESTAURANT <business id>
-        
-        //ADDUSER <user info>
-        //ADDRESTAURANT <restaurant info>
-        //ADDREVIEW <review info>
-    	
-    	int split = input.indexOf(" ");
-    	String command = input.substring(0, split +1);
-    	String response;
-    	
-    	if (command.equals("GETRESTAURANT")) {
-    		String bID = input.substring(split +1, input.length() +1);  // is length +1 necessary?
-    		response = yelpDB.getRestaurantJSON(bID);
-    	}
-    	else if (command.equals("ADDUSER")) {
-    		
-    		
-    	}
-    	else if (command.equals("ADDRESTAURANT")) {
-    		
-    	}
-    	else if (command.equals("ADDREVIEW")) {
-    		
-    	}
-    	else {
-    		response = "ERR: ILLEGAL_REQUEST";
 
-    	}
-    	return response;
+        input = input.trim();
+        String[] words = input.split(" +");
+
+        String command = words[0];
+        String jsonInfo = words[1];
+        String response = "ERR: ILLEGAL_REQUEST";
+
+        if (command.equals("GETRESTAURANT")) {
+            response = yelpDB.getRestaurantJSON(jsonInfo);
+        } else if (command.equals("ADDUSER")) {
+            try {
+                response = yelpDB.addUserJSON(jsonInfo);
+            } catch (JsonSyntaxException e) {
+                response = "ERR: INVALID_USER_STRING";
+            }
+        } else if (command.equals("ADDRESTAURANT")) {
+            try {
+                response = yelpDB.addRestaurantJSON(jsonInfo);
+            } catch (JsonSyntaxException e) {
+                response = "ERR: INVALID_RESTAURANT_STRING";
+            }
+        } else if (command.equals("ADDREVIEW")) {
+            response = null; //TODO
+        } else if (command.equals("QUERY")) {
+            response = null; //TODO
+        }
+ 
+        return response;
     }
-
 
     /**
      * Start a FibonacciServerMulti running on some port.

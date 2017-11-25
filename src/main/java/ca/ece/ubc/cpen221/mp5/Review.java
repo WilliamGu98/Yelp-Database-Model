@@ -3,14 +3,14 @@ package ca.ece.ubc.cpen221.mp5;
 import java.util.*;
 
 public class Review implements DataEntry {
-    private String review_id;
-    private String type;
-    private String business_id;
-    private Map votes;
-    private String text;
-    private int stars;
-    private String user_id;
-    private String date;
+    protected String review_id;
+    protected String type;
+    protected String business_id;
+    protected Map votes;
+    protected String text;
+    protected int stars;
+    protected String user_id;
+    protected String date;
 
     public String getUserId() {
         return this.user_id;
