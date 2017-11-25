@@ -19,6 +19,7 @@ public class YelpDB<DataEntry> implements MP5Db {
     private Map<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of the review
     private Map<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that of the user
                                            // id
+    Gson gson; //For JSON parsing
 
     /**
      * Constructor for a yelp database
@@ -34,7 +35,7 @@ public class YelpDB<DataEntry> implements MP5Db {
      */
     public YelpDB(String restaurants, String reviews, String users) throws IOException {
 
-        Gson gson = new Gson();
+        this.gson = new Gson();
         this.restaurantMap = new HashMap<String, Restaurant>();
         this.reviewMap = new HashMap<String, Review>();
         this.userMap = new HashMap<String, YelpUser>();
@@ -101,28 +102,6 @@ public class YelpDB<DataEntry> implements MP5Db {
      */
     public YelpUser getYelpUser(String uID) {
         return this.userMap.get(uID);
-    }
-
-    /**
-     * @return Returns a copy of the set of all the restaurant business_ids in the
-     *         database
-     */
-    public Set<String> getRestaurantSet() {
-        return new HashSet<String>(restaurantMap.keySet());
-    }
-
-    /**
-     * @return Returns a copy of the set of all the review_id's in the database
-     */
-    public Set<String> getReviewSet() {
-        return new HashSet<String>(reviewMap.keySet());
-    }
-
-    /**
-     * @return Returns a copy of the set of all user_id's in the database
-     */
-    public Set<String> getUserSet() {
-        return new HashSet<String>(this.userMap.keySet());
     }
 
     /**
@@ -217,6 +196,34 @@ public class YelpDB<DataEntry> implements MP5Db {
         };
 
         return function;
+    }
+    
+    
+    /** Methods for Server **/
+    
+    public String getRestaurantJSON(String rID) {        
+        return gson.toJson(this.restaurantMap.get(rID));
+    }
+    
+    
+    public String addUser(String jsonInfo) {
+        YelpUser user = gson.fromJson(jsonInfo, YelpUser.class);
+        
+        //We need to only create "new" fields for the yelpuser if
+        //it is not included in jsonInfo
+        //How to do this?
+        //Also need to randomize a user id and a url
+        //We could add a method that does this? Or do we change constructor?
+        
+        return null; //Return jsonInfo of completed user (with all fields filled)
+    }
+    
+    public String addRestaurant(String jsonInfo) {
+        return null;
+    }
+    
+    public String addReview(String jsonInfo) {
+        return null;
     }
 
     /** HELPER METHODS **/
