@@ -14,7 +14,7 @@ public class JsonTest {
 
     @Test
     public void test() throws IOException{
-        YelpDB db = new YelpDB ("data/restaurants.json", "data/reviews.json","data/users.json");
+        YelpDB db = new YelpDB ("data/restaurants.json", "data/reviews.json", "data/users.json");
         ToDoubleBiFunction<String,YelpDB> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
         
         /*
