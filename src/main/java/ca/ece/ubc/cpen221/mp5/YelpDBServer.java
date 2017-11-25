@@ -116,7 +116,7 @@ public class YelpDBServer {
     public String requestParser(String input) {
 
         input = input.trim();
-        String[] words = input.split(" +");
+        String[] words = input.split(" +",2); //Split into two words
 
         String command = words[0];
         String jsonInfo = words[1];
@@ -137,11 +137,11 @@ public class YelpDBServer {
                 response = "ERR: INVALID_RESTAURANT_STRING";
             }
         } else if (command.equals("ADDREVIEW")) {
-            response = null; //TODO
+            response = null; // TODO
         } else if (command.equals("QUERY")) {
-            response = null; //TODO
+            response = null; // TODO
         }
- 
+
         return response;
     }
 
@@ -150,7 +150,7 @@ public class YelpDBServer {
      */
     public static void main(String[] args) {
         try {
-            int portNum = Integer.parseInt(args[0]);
+            int portNum = 7777;
             YelpDBServer server = new YelpDBServer(portNum);
             server.serve();
         } catch (IOException e) {

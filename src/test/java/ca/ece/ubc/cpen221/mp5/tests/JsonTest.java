@@ -14,7 +14,7 @@ import com.google.gson.*;
 
 public class JsonTest {
 
-    @Test
+    //@Test
     public void test() throws IOException{
         YelpDB db = new YelpDB ("data/restaurants.json", "data/reviews.json", "data/users.json");
         ToDoubleBiFunction<String,YelpDB> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
@@ -27,11 +27,17 @@ public class JsonTest {
         System.out.println(db.kMeansClusters_json(5));
     }
     
-    @Test
+    //@Test
     public void testJSON() throws IOException{
         System.out.println("\"name\": \"asdf\"");
         Gson gson = new Gson();
         YelpUser u = gson.fromJson("{\"name\": \"asdf\"}", YelpUser.class);
         System.out.println(u.getName());
+    }
+    
+    @Test
+    public void testServerStuff() throws IOException{
+        YelpDBServer serv = new YelpDBServer(7777);
+        System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 }

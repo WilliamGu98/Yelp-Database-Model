@@ -553,15 +553,16 @@ public class YelpDB<DataEntry> implements MP5Db {
 
         String userID;
         do {
-            int randomIDnum = 1 + (2000000) * r.nextInt();
+            int randomIDnum = r.nextInt(999999999) + 1;
             userID = String.valueOf(randomIDnum);
-        } while (!this.userMap.containsKey(userID));
+        } while (this.userMap.containsKey(userID));
         this.userMap.put(userID, user);
         return userID;
     }
-    
+
     /**
-     * Generates a new restaurant ID and puts it in the database along with the given restaurant
+     * Generates a new restaurant ID and puts it in the database along with the
+     * given restaurant
      * 
      * @return the new restaurant id
      */
@@ -570,9 +571,9 @@ public class YelpDB<DataEntry> implements MP5Db {
 
         String restID;
         do {
-            int randomIDnum = 1 + (2000000) * r.nextInt();
+            int randomIDnum = r.nextInt(999999999) + 1;
             restID = String.valueOf(randomIDnum);
-        } while (!this.restaurantMap.containsKey(restID));
+        } while (this.restaurantMap.containsKey(restID));
         this.restaurantMap.put(restID, rest);
         return restID;
     }
