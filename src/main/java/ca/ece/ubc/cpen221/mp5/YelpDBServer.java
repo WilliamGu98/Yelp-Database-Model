@@ -101,8 +101,7 @@ public class YelpDBServer {
                 try {
                     // compute answer and send back to client
                     
-                    // Replace this with something that parses the request and
-                    // chooses an appropriate method to call
+                    // Check what the request is and respond accordingly
                     String response = requestParser(line);
                     
                     
@@ -124,17 +123,15 @@ public class YelpDBServer {
     }
     
     /**
-     * Parses a request from a client (there are 4 different possible requests)
+     * Parses a request from a client (there are 5 different possible requests)
      * @param input from client
      * @return a response from the server
      */
     public String requestParser(String input) {
         
-        // Important note: to handle concurrency we can simply replace
-        // all our maps with concurrent hashmaps
-        
         //Possible requests:
         //GETRESTAURANT <business id>
+        
         //ADDUSER <user info>
         //ADDRESTAURANT <restaurant info>
         //ADDREVIEW <review info>
@@ -162,18 +159,16 @@ public class YelpDBServer {
 
     	}
     	return response;
-
     }
 
 
     /**
-     * Start a FibonacciServerMulti running on the default port.
+     * Start a FibonacciServerMulti running on some port.
      */
     public static void main(String[] args) {
         try {
             int portNum = Integer.parseInt(args[0]);
-            YelpDBServer server = new YelpDBServer(
-                    portNum);
+            YelpDBServer server = new YelpDBServer(portNum);
             server.serve();
         } catch (IOException e) {
             e.printStackTrace();
