@@ -32,12 +32,12 @@ public class YelpUser extends User {
      * 
      * @param db
      */
-    public void addNewUser(YelpDB db) {
+    public void generateNewUserInfo(YelpDB db) {
         this.votes = new HashMap<String, Integer>();
         this.review_count = 0;
         this.type = "user";
         this.average_stars = 0.0;
-        this.user_id = db.addUser(this);
+        this.user_id = db.generateUserID();
         this.url = "http://www.yelp.com/user_details?userid=" + this.user_id;
     }
 }

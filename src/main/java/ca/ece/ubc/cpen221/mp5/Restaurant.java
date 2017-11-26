@@ -77,9 +77,12 @@ public class Restaurant extends Business {
         return this.price;
     }
     
-    public void addNewRestaurant(YelpDB db) {
+    public void generateNewRestaurantInfo(YelpDB db) {
         this.type = "business";
-        this.business_id = db.addRestaurant(this);
+        //Other stuff here
+        
+        
+        this.business_id = db.generateRestaurantID();
         this.url = "http://www.yelp.com/restaurant_details?businessid=" + this.business_id;
     }
 }

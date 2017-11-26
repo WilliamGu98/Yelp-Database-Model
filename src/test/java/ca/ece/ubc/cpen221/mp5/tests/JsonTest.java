@@ -7,6 +7,7 @@ import org.junit.Test;
 import ca.ece.ubc.cpen221.mp5.*;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.ToDoubleBiFunction;
 
@@ -35,7 +36,7 @@ public class JsonTest {
         System.out.println(u.getName());
     }
     
-    @Test
+    //@Test
     public void testServerStuff() throws IOException{
         YelpDBServer serv = new YelpDBServer(7777);
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
