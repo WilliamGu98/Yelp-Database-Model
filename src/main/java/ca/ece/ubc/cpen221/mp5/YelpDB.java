@@ -178,7 +178,7 @@ public class YelpDB<DataEntry> implements MP5Db {
         // Construct two lists of user_ratings and restaurant_prices
         for (Review r : this.reviewMap.values()) {
             if (r.getUserId().equals(user)) {
-                user_ratings.add(r.getRating());
+                user_ratings.add(r.getStars());
                 restaurant_price.add(this.restaurantMap.get(r.getBusinessId()).getPrice());
             }
         }
@@ -203,6 +203,7 @@ public class YelpDB<DataEntry> implements MP5Db {
     /** Methods for Server **/
 
     /**
+     * Retrieves the JSON representation of a given restaurant, found by its ID
      * 
      * @param rID
      * @return returns a string in JSON format of the restaurant info
@@ -217,19 +218,19 @@ public class YelpDB<DataEntry> implements MP5Db {
      * 
      * @param jsonInfo
      *            string in json format that represents new user
-     * @return the json format of the newly added user
+     * @modifies this database by adding a new user
+     * @return the json format info of the newly added user
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if the name field is null
      */
     public String addUserJSON(String jsonInfo) throws JsonSyntaxException {
         YelpUser user = gson.fromJson(jsonInfo, YelpUser.class);
+        // Check if required fields (ie. name) are null
         if (user.getName() == null) {
-            // Exception thrown if name is null
             throw new JsonSyntaxException(jsonInfo);
         }
-        // Add new user fields (such as user_id, url, votes, etc.)
-        // The method also adds the user to this database
-        user.addNewUser(this);
+        user.generateNewUserInfo(this); // Add new user fields (such as user_id, url, votes, etc.)
+        this.userMap.put(user.toString(), user); // Add the user to the database
         return gson.toJson(user); // Return jsonInfo of completed user (with all fields filled)
     }
 
@@ -237,20 +238,53 @@ public class YelpDB<DataEntry> implements MP5Db {
      * Adds a new restaurant to the database given restaurant info in json format
      * 
      * @param jsonInfo
-     * @return
+     *            string in json format that represents new user
+     * @modifies this database by adding a new restaurant
+     * @return the json format info of the newly added restaurant
+     * @throws JsonSyntaxException
+     *             if jsonInfo is not in json format or if any required fields for
+     *             restaurant are null
      */
     public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
+        // Check if any required fields are null
         if (rest.getCity() == null || rest.getState() == null || rest.getName() == null
                 || rest.getFullAddress() == null) {
             throw new JsonSyntaxException(jsonInfo);
         }
-
+        rest.generateNewRestaurantInfo(this);
+        this.restaurantMap.put(rest.toString(), rest);
         return gson.toJson(rest);
     }
 
-    public String addReview(String jsonInfo) {
-        return null;
+    /**
+     * Adds a new review
+     * 
+     * @param jsonInfo
+     * @return
+     */
+    public String addReviewJSON(String jsonInfo) throws JsonSyntaxException {
+        Review review = gson.fromJson(jsonInfo, Review.class);
+
+        // If any required fields are null, throw a JsonSyntaxException (Invalid review
+        // format)
+        if (review.getText() == null || review.getUserId() == null || review.getBusinessId() == null
+                || review.getStars() == 0) {
+            throw new JsonSyntaxException(jsonInfo);
+        }
+        // We confirm if the review actually has a valid user id and restaurant id
+        // associated with it
+        else if (!this.restaurantMap.containsKey(review.getBusinessId())) {
+            return "ERR: NO_SUCH_RESTAURANT";
+        } else if (!this.userMap.containsKey(review.getUserId())) {
+            return "ERR: NO_SUCH_USER";
+        }
+        // Valid json review with valid restaurant and user references
+        else {
+            review.generateNewReviewInfo(this);
+            this.reviewMap.put(review.toString(), review);
+            return gson.toJson(review);
+        }
     }
 
     /** HELPER METHODS **/
@@ -544,37 +578,42 @@ public class YelpDB<DataEntry> implements MP5Db {
     }
 
     /**
-     * Generates a new user ID and puts it in the database along with the given user
+     * Generates a new user ID
      * 
      * @return the new user id
      */
-    protected String addUser(YelpUser user) {
+    protected String generateUserID() {
         Random r = new Random();
-
         String userID;
         do {
             int randomIDnum = r.nextInt(999999999) + 1;
             userID = String.valueOf(randomIDnum);
         } while (this.userMap.containsKey(userID));
-        this.userMap.put(userID, user);
         return userID;
     }
 
     /**
-     * Generates a new restaurant ID and puts it in the database along with the
-     * given restaurant
+     * Generates a new restaurant ID
      * 
      * @return the new restaurant id
      */
-    protected String addRestaurant(Restaurant rest) {
+    protected String generateRestaurantID() {
         Random r = new Random();
-
         String restID;
         do {
             int randomIDnum = r.nextInt(999999999) + 1;
             restID = String.valueOf(randomIDnum);
         } while (this.restaurantMap.containsKey(restID));
-        this.restaurantMap.put(restID, rest);
+        return restID;
+    }
+
+    protected String generateReviewID() {
+        Random r = new Random();
+        String restID;
+        do {
+            int randomIDnum = r.nextInt(999999999) + 1;
+            restID = String.valueOf(randomIDnum);
+        } while (this.reviewMap.containsKey(restID));
         return restID;
     }
 }
