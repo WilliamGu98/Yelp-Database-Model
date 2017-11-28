@@ -157,7 +157,7 @@ public class YelpDBServer {
      */
     public static void main(String[] args) {
         try {
-            int portNum = 7777;
+            int portNum = Integer.parseInt(args[0]);
             YelpDBServer server = new YelpDBServer(portNum);
             server.serve();
         } catch (IOException e) {

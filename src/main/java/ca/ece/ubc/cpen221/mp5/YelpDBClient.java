@@ -74,7 +74,7 @@ public class YelpDBClient {
      */
     public static void main(String[] args) {
         try {
-            int portNum = 7777;
+            int portNum = Integer.parseInt(args[0]);
             YelpDBClient client = new YelpDBClient("localhost", portNum);
 
             String request1 = "GETRESTAURANT h_we4E3zofRTf4G0JTEF0A";
