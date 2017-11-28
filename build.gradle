@@ -42,10 +42,13 @@ jacocoTestReport {
     }
 }
 
-generateGrammarSource << {
-    println "Copying generated grammar lexer/parser files to main directory."
+generateGrammarSource {
+  doLast {
     copy {
-        from "${buildDir}/generated-src/antlr/main"
-        into "src/main/java/ca/ece/ubc/cpen221/parser"
+      from 'build/generated-src/antlr/main/'
+      include '*.*'
+      into 'src/main/java/ca/ece/ubc/cpen221/parser'
     }
+    project.delete fileTree('build/generated-src/antlr/main').include('*.*')
+  }
 }
