@@ -29,7 +29,10 @@ public class YelpDBServer {
      */
     public YelpDBServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        this.yelpDB = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+        this.yelpDB = new YelpDB(
+                "/Users/mymacbook/cpen221workspace/f17-mp5-rectriangle_andrewliu5050/data/restaurants.json",
+                "/Users/mymacbook/cpen221workspace/f17-mp5-rectriangle_andrewliu5050/data/reviews.json",
+                "/Users/mymacbook/cpen221workspace/f17-mp5-rectriangle_andrewliu5050/data/users.json");
     }
 
     /**
