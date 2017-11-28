@@ -155,7 +155,6 @@ public class YelpDB<DataEntry> implements MP5Db {
         for (Set<String> cluster : restaurantClusters.values()) {
             kMeansClusters.add(cluster);
         }
-
         return this.clusterToJSON(kMeansClusters);
     }
 
@@ -285,6 +284,10 @@ public class YelpDB<DataEntry> implements MP5Db {
             this.reviewMap.put(review.toString(), review);
             return gson.toJson(review);
         }
+    }
+    
+    public String querySearch(String query) {
+        return null;
     }
 
     /** HELPER METHODS **/

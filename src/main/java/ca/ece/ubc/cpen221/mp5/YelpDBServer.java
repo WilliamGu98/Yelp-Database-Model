@@ -122,34 +122,33 @@ public class YelpDBServer {
         String[] words = input.split(" +", 2); // Split client request into two words
 
         String command = words[0];
-        String jsonInfo = words[1];
+        String data = words[1];
         String response = "ERR: ILLEGAL_REQUEST"; // Default response
 
         // Check the command to execute a method accordingly
         if (command.equals("GETRESTAURANT")) {
-            response = yelpDB.getRestaurantJSON(jsonInfo);
+            response = yelpDB.getRestaurantJSON(data);
         } else if (command.equals("ADDUSER")) {
             try {
-                response = yelpDB.addUserJSON(jsonInfo);
+                response = yelpDB.addUserJSON(data);
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_USER_STRING";
             }
         } else if (command.equals("ADDRESTAURANT")) {
             try {
-                response = yelpDB.addRestaurantJSON(jsonInfo);
+                response = yelpDB.addRestaurantJSON(data);
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_RESTAURANT_STRING";
             }
         } else if (command.equals("ADDREVIEW")) {
             try {
-                response = yelpDB.addReviewJSON(jsonInfo);
+                response = yelpDB.addReviewJSON(data);
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_REVIEW_STRING";
             }
         } else if (command.equals("QUERY")) {
-            response = "?"; // TODO
+            response = yelpDB.querySearch(data);
         }
-
         return response;
     }
 
