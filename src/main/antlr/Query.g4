@@ -7,6 +7,7 @@ grammar Query;
  /* Lexer Rules */
  NUM : [1-5] ;
  STRING: [A-Za-z]+ ([ \t]+[A-Za-z]+)* ; 
+ WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
  
  /* Parser Rules */
  root : orExpr EOF ;
