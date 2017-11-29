@@ -45,7 +45,7 @@ public class Review implements DataEntry {
     }
 
     @Override
-    public String toString() {
+    public String getID() {
         return this.review_id;
     }
 

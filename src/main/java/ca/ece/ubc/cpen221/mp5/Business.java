@@ -49,7 +49,7 @@ public class Business implements DataEntry {
      * @return the business id of the business
      */
     @Override
-    public String toString() {
+    public String getID() {
         return this.business_id;
     }
 
