@@ -24,7 +24,7 @@ import com.google.gson.*;
 
 public class CustomTests {
 
-    // @Test
+    @Test
     public void test() throws IOException {
         YelpDB db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
         ToDoubleBiFunction<String, YelpDB> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
@@ -36,7 +36,7 @@ public class CustomTests {
          * db)); //Price is 4
          */
 
-        System.out.println(db.kMeansClusters_json(8));
+        System.out.println(db.kMeansClusters_json(40));
     }
 
     // @Test
@@ -53,11 +53,11 @@ public class CustomTests {
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 
-    @Test
+    //@Test
     public void testANTLR() {
 
         CharStream stream = new ANTLRInputStream(
-                "in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 2 || price >=4)");
+                "in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 2 || price >=4) && (rating>2)");
 
         QueryLexer lexer = new QueryLexer(stream);
         TokenStream tokens = new CommonTokenStream(lexer);
@@ -70,10 +70,19 @@ public class CustomTests {
         // Create a parser that feeds of the token buffer
 
         QueryParser parser = new QueryParser(tokens);
-
-        // Begin parsing at atom rule
-        ParseTree tree = parser.andExpr();
-
+        
+        ParseTree tree = parser.root();
+        
+        //TEXTUAL VIEW//
+        System.err.println(tree.toStringTree(parser));
+        
+        //LISTENER SETUP//
+        ParseTreeWalker walker = new ParseTreeWalker();
+        QueryListener listener = new QueryCreator();
+        walker.walk(listener, tree);
+        
+        //VISUALIZATION//
+        
         // show AST in GUI
         JFrame frame = new JFrame("Antlr AST");
         JPanel panel = new JPanel();

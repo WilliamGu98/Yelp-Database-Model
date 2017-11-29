@@ -11,7 +11,7 @@ grammar Query;
  
  /* Parser Rules */
  root : orExpr EOF ;
- orExpr : andExpr ('||' andExpr)* ; // ?
+ orExpr : andExpr ('||' andExpr)* ; 
  andExpr : atom ('&&' atom)* ;
  atom : in | category | rating | price | name | '(' orExpr ')' ;
  ineq : '>' | '>=' | '<' | '<=' | '=' ;
