@@ -141,20 +141,48 @@ public class YelpDB<DataEntry> implements MP5Db {
 
         // restaurant clusters contains random centroids mapped to a set of its closest
         // restaurants (in id form)
-        Map<double[], Set<String>> restaurantClusters = this.initiateClusters(k);
+        Map<double[], Set<String>> restaurantClusters = this.initiateClusters(k, this.restaurantMap.keySet());
 
         // Flag is true if any restaurants are reassigned to a new centroid
         // If no restaurants are reassigned, then we are done
         boolean flag;
         do {
             this.reassignCentroids(restaurantClusters);
-            flag = this.reassignRestaurants(restaurantClusters);
+            flag = reassignRestaurants(restaurantClusters, this.restaurantMap.keySet());
         } while (flag);
 
         // Add final restaurant clusters to list
         for (Set<String> cluster : restaurantClusters.values()) {
             kMeansClusters.add(cluster);
         }
+
+        // Get rid of empty clusters by splitting large clusters
+        while (atLeastOneEmptyCluster(kMeansClusters)) {   
+            // Find one empty set and remove it from the list of clusters
+            Set<String> emptyCluster = findEmptyCluster(kMeansClusters);
+            kMeansClusters.remove(emptyCluster);
+
+            // Find largest set and remove it from the list of clusters
+            Set<String> largestCluster = findLargestCluster(kMeansClusters);
+            kMeansClusters.remove(largestCluster);
+
+            // Attempt to split largest cluster (Use the first two restaurants as centers)
+            Map<double[], Set<String>> splitClusters = splitCluster(largestCluster);
+            
+            /*
+            Map<double[], Set<String>> splitClusters = this.initiateClusters(2, largestCluster);
+            do {
+                this.reassignCentroids(splitClusters);
+                flag = this.reassignRestaurants(splitClusters);
+            } while (flag); */
+            
+
+            // Add final split clusters back into original list
+            for (Set<String> newSplitCluster : splitClusters.values()) {
+                kMeansClusters.add(newSplitCluster);
+            }
+        }
+
         return this.clusterToJSON(kMeansClusters);
     }
 
@@ -285,7 +313,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             return gson.toJson(review);
         }
     }
-    
+
     public String querySearch(String query) {
         return null;
     }
@@ -403,12 +431,14 @@ public class YelpDB<DataEntry> implements MP5Db {
      * 
      * @param k
      *            number of clusters to generate. k should be greater than 0
+     * @param restaurantIDs
+     *            the set of restaurantIDs we wish to involve in cluster generation
      * @return a map where the keys represent centroids and the values represent a
      *         set of strings where each string represents one of the restaurants in
      *         the database with its ID. each unique restaurant is mapped by exactly
      *         one centroid
      */
-    private Map<double[], Set<String>> initiateClusters(int k) {
+    private Map<double[], Set<String>> initiateClusters(int k, Set<String> restaurantIDs) {
         // centroids[0] is lattitude and centroids[1] is longitude for a centroid
         // Map assigns restaurants to a specific centroid
         Map<double[], Set<String>> restaurantClusters = new HashMap<double[], Set<String>>();
@@ -419,9 +449,9 @@ public class YelpDB<DataEntry> implements MP5Db {
         double maxLat = -Double.MAX_VALUE;
         double maxLon = -Double.MAX_VALUE;
 
-        for (Restaurant r : this.restaurantMap.values()) {
-            double lat = r.getLatitude();
-            double lon = r.getLongitude();
+        for (String rID : restaurantIDs) {
+            double lat = this.getRestaurant(rID).getLatitude();
+            double lon = this.getRestaurant(rID).getLongitude();
             if (lat < minLat) {
                 minLat = lat;
             }
@@ -444,13 +474,13 @@ public class YelpDB<DataEntry> implements MP5Db {
             restaurantClusters.put(this.generateRandomCentroid(minLat, maxLat, minLon, maxLon), emptySet);
         }
 
-        // Assign each resetaurant to its closest centroid
-        for (String rID : this.restaurantMap.keySet()) {
+        // Assign each restaurant to its closest centroid
+        for (String rID : restaurantIDs) {
             double[] newCentroid = null;
             double minDist = Double.MAX_VALUE;
 
             for (double[] centroid : restaurantClusters.keySet()) {
-                double distance = this.computeDistance(centroid, this.restaurantMap.get(rID));
+                double distance = this.computeDistance(centroid, this.getRestaurant(rID));
                 if (distance < minDist) {
                     newCentroid = centroid;
                     minDist = distance;
@@ -470,15 +500,15 @@ public class YelpDB<DataEntry> implements MP5Db {
      * @return true if at least one restaurant is reassigned and false if 0
      *         restaurants are reassigned
      */
-    private boolean reassignRestaurants(Map<double[], Set<String>> restaurantClusters) {
+    private boolean reassignRestaurants(Map<double[], Set<String>> restaurantClusters, Set<String> restaurantIDs) {
         // For each restaurant, go through each centroid and find which one it belongs
         // to (old centroid)
         // At the same time, keep track of the distances for a potential new centroid
         // target
         boolean flag = false;
 
-        for (String rID : this.restaurantMap.keySet()) {
-            Restaurant r = this.restaurantMap.get(rID);
+        for (String rID : restaurantIDs) {
+            Restaurant r = this.getRestaurant(rID);
 
             double[] oldCentroid = null;
             double[] newCentroid = null;
@@ -527,7 +557,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             int size = restaurantClusters.get(centroid).size();
 
             for (String rID : restaurantClusters.get(centroid)) {
-                Restaurant r = this.restaurantMap.get(rID);
+                Restaurant r = this.getRestaurant(rID);
                 // Get the total value for lattitude and longitude for all restaurants
                 // in the cluster
                 totalLat += r.getLatitude();
@@ -537,6 +567,88 @@ public class YelpDB<DataEntry> implements MP5Db {
             centroid[0] = totalLat / size;
             centroid[1] = totalLon / size;
         }
+    }
+    
+    private boolean atLeastOneEmptyCluster(List<Set<String>> kMeansClusters) {
+        for (Set<String> cluster : kMeansClusters) {
+            if (cluster.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds an empty set, if none exist return null
+     * 
+     * @param kMeansClusters
+     * @return
+     */
+    private Set<String> findEmptyCluster(List<Set<String>> kMeansClusters) {
+        for (Set<String> cluster : kMeansClusters) {
+            if (cluster.isEmpty()) {
+                return cluster;
+            }
+        }
+        return null;
+    }
+
+    private Set<String> findLargestCluster(List<Set<String>> kMeansClusters) {
+        int maxSize = 0;
+        Set<String> largestCluster = null;
+        for (Set<String> cluster : kMeansClusters) {
+            if (cluster.size() > maxSize) {
+                largestCluster = cluster;
+                maxSize = cluster.size();
+            }
+        }
+        return largestCluster;
+    }
+    
+    private Map<double[], Set<String>> splitCluster(Set<String> clusterToSplit) {
+     // Find the min and max latitudes and longitudes
+        double minLat = Double.MAX_VALUE;
+        double minLon = Double.MAX_VALUE;
+        double maxLat = -Double.MAX_VALUE;
+        double maxLon = -Double.MAX_VALUE;
+
+        for (String rID : clusterToSplit) {
+            double lat = this.getRestaurant(rID).getLatitude();
+            double lon = this.getRestaurant(rID).getLongitude();
+            if (lat < minLat) {
+                minLat = lat;
+            }
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
+            if (lon < minLon) {
+                minLon = lon;
+            }
+            if (lon > maxLon) {
+                maxLon = lon;
+            }
+        }
+        double[] centroid1 = new double[] {minLat,minLon};
+        double[] centroid2 = new double[] {maxLat,maxLon};
+        
+        Map<double[], Set<String>> splitClusters = new HashMap<double[], Set<String>>();
+        splitClusters.put(centroid1, new HashSet<String>());
+        splitClusters.put(centroid2, new HashSet<String>());
+
+        for (String rID : clusterToSplit) {
+            double dist1 = computeDistance(centroid1, this.getRestaurant(rID));
+            double dist2 = computeDistance(centroid2, this.getRestaurant(rID));
+            
+            if (dist1<=dist2) {
+                splitClusters.get(centroid1).add(rID);
+            }
+            else {
+                splitClusters.get(centroid2).add(rID);
+            }
+
+        }
+        
+        return splitClusters;
     }
 
     /**
