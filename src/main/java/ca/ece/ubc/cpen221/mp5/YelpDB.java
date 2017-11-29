@@ -7,7 +7,7 @@ import java.util.function.ToDoubleBiFunction;
 
 import com.google.gson.*;
 
-public class YelpDB<DataEntry> implements MP5Db {
+public class YelpDB implements MP5Db<Restaurant> {
 
     /**
      * AF: Represents a yelp database that includes lookup tables for the
@@ -47,7 +47,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             String line;
             while ((line = reader.readLine()) != null) {
                 Restaurant r = gson.fromJson(line, Restaurant.class);
-                String business_id = r.toString();
+                String business_id = r.getID();
                 this.restaurantMap.put(business_id, r);
             }
         }
@@ -57,7 +57,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             String line;
             while ((line = reader.readLine()) != null) {
                 Review r = gson.fromJson(line, Review.class);
-                String review_id = r.toString();
+                String review_id = r.getID();
                 this.reviewMap.put(review_id, r);
             }
         }
@@ -67,7 +67,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             String line;
             while ((line = reader.readLine()) != null) {
                 YelpUser u = gson.fromJson(line, YelpUser.class);
-                String user_id = u.toString();
+                String user_id = u.getID();
                 this.userMap.put(user_id, u);
             }
         }
@@ -114,7 +114,7 @@ public class YelpDB<DataEntry> implements MP5Db {
      * @return the set of objects that matches the query
      */
     @Override
-    public Set<DataEntry> getMatches(String queryString) {
+    public Set<Restaurant> getMatches(String queryString) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -157,7 +157,7 @@ public class YelpDB<DataEntry> implements MP5Db {
         }
 
         // Get rid of empty clusters by splitting large clusters
-        while (atLeastOneEmptyCluster(kMeansClusters)) {   
+        while (atLeastOneEmptyCluster(kMeansClusters)) {
             // Find one empty set and remove it from the list of clusters
             Set<String> emptyCluster = findEmptyCluster(kMeansClusters);
             kMeansClusters.remove(emptyCluster);
@@ -168,14 +168,6 @@ public class YelpDB<DataEntry> implements MP5Db {
 
             // Attempt to split largest cluster (Use the first two restaurants as centers)
             Map<double[], Set<String>> splitClusters = splitCluster(largestCluster);
-            
-            /*
-            Map<double[], Set<String>> splitClusters = this.initiateClusters(2, largestCluster);
-            do {
-                this.reassignCentroids(splitClusters);
-                flag = this.reassignRestaurants(splitClusters);
-            } while (flag); */
-            
 
             // Add final split clusters back into original list
             for (Set<String> newSplitCluster : splitClusters.values()) {
@@ -192,13 +184,18 @@ public class YelpDB<DataEntry> implements MP5Db {
      * 
      * @param user
      *            represents a user_id in the database
+     * @throws illegal
+     *             argument exception if there is insufficient data in the database
+     *             to create a valid predictor function
      * @return a function that predicts the user's ratings for objects (of type T)
      *         in the database of type MP5Db<T>. The function that is returned takes
      *         two arguments: one is the database and other other is a String that
-     *         represents the id of an object of type T.
+     *         represents the id of an object of type T. If there is insufficient
+     *         quantities of data in the database to create a predictor function, an
+     *         illegal argument exception is thrown.
      */
     @Override
-    public ToDoubleBiFunction<YelpDB<DataEntry>, String> getPredictorFunction(String user) {
+    public ToDoubleBiFunction<MP5Db<Restaurant>, String> getPredictorFunction(String user) {
         List<Integer> user_ratings = new ArrayList<Integer>(); // x
         List<Integer> restaurant_price = new ArrayList<Integer>(); // y
 
@@ -216,11 +213,17 @@ public class YelpDB<DataEntry> implements MP5Db {
         double Sxy = computeSxy(restaurant_price, meanX, user_ratings, meanY);
 
         double b = Sxy / Sxx;
+
+        // If predictor function does not contain enough data, throw runtime exception
+        if (Double.isNaN(b)) {
+            throw new IllegalArgumentException();
+        }
+
         double a = meanY - b * meanX;
 
-        ToDoubleBiFunction<YelpDB<DataEntry>, String> function = (database, restaurantID) -> {
+        ToDoubleBiFunction<MP5Db<Restaurant>, String> function = (database, restaurantID) -> {
             // Function logic
-            double price = database.getRestaurant(restaurantID).getPrice();
+            double price = ((YelpDB) database).getRestaurant(restaurantID).getPrice();
             return a + b * price;
         };
 
@@ -257,7 +260,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             throw new JsonSyntaxException(jsonInfo);
         }
         user.generateNewUserInfo(this); // Add new user fields (such as user_id, url, votes, etc.)
-        this.userMap.put(user.toString(), user); // Add the user to the database
+        this.userMap.put(user.getID(), user); // Add the user to the database
         return gson.toJson(user); // Return jsonInfo of completed user (with all fields filled)
     }
 
@@ -280,7 +283,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             throw new JsonSyntaxException(jsonInfo);
         }
         rest.generateNewRestaurantInfo(this);
-        this.restaurantMap.put(rest.toString(), rest);
+        this.restaurantMap.put(rest.getID(), rest);
         return gson.toJson(rest);
     }
 
@@ -309,7 +312,7 @@ public class YelpDB<DataEntry> implements MP5Db {
         // Valid json review with valid restaurant and user references
         else {
             review.generateNewReviewInfo(this);
-            this.reviewMap.put(review.toString(), review);
+            this.reviewMap.put(review.getID(), review);
             return gson.toJson(review);
         }
     }
@@ -568,7 +571,7 @@ public class YelpDB<DataEntry> implements MP5Db {
             centroid[1] = totalLon / size;
         }
     }
-    
+
     private boolean atLeastOneEmptyCluster(List<Set<String>> kMeansClusters) {
         for (Set<String> cluster : kMeansClusters) {
             if (cluster.isEmpty()) {
@@ -604,9 +607,9 @@ public class YelpDB<DataEntry> implements MP5Db {
         }
         return largestCluster;
     }
-    
+
     private Map<double[], Set<String>> splitCluster(Set<String> clusterToSplit) {
-     // Find the min and max latitudes and longitudes
+        // Find the min and max latitudes and longitudes
         double minLat = Double.MAX_VALUE;
         double minLon = Double.MAX_VALUE;
         double maxLat = -Double.MAX_VALUE;
@@ -628,9 +631,9 @@ public class YelpDB<DataEntry> implements MP5Db {
                 maxLon = lon;
             }
         }
-        double[] centroid1 = new double[] {minLat,minLon};
-        double[] centroid2 = new double[] {maxLat,maxLon};
-        
+        double[] centroid1 = new double[] { minLat, minLon };
+        double[] centroid2 = new double[] { maxLat, maxLon };
+
         Map<double[], Set<String>> splitClusters = new HashMap<double[], Set<String>>();
         splitClusters.put(centroid1, new HashSet<String>());
         splitClusters.put(centroid2, new HashSet<String>());
@@ -638,16 +641,15 @@ public class YelpDB<DataEntry> implements MP5Db {
         for (String rID : clusterToSplit) {
             double dist1 = computeDistance(centroid1, this.getRestaurant(rID));
             double dist2 = computeDistance(centroid2, this.getRestaurant(rID));
-            
-            if (dist1<=dist2) {
+
+            if (dist1 <= dist2) {
                 splitClusters.get(centroid1).add(rID);
-            }
-            else {
+            } else {
                 splitClusters.get(centroid2).add(rID);
             }
 
         }
-        
+
         return splitClusters;
     }
 

@@ -26,17 +26,23 @@ public class CustomTests {
 
     @Test
     public void test() throws IOException {
-        YelpDB db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-        ToDoubleBiFunction<String, YelpDB> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
+        MP5Db<Restaurant> db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+        
+        ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
+        System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
+        System.out.println(func.applyAsDouble(db, "h_we4E3zofRTf4G0JTEF0A")); // Price is 3
+        System.out.println(func.applyAsDouble(db, "sxIPX4ZAipVl3ZCkkqXqZw")); // Price is 4
 
-        /*
-         * System.out.println(func.applyAsDouble("BJKIoQa5N2T_oDlLVf467Q", db)); //Price
-         * is 2 System.out.println(func.applyAsDouble("h_we4E3zofRTf4G0JTEF0A", db));
-         * //Price is 3 System.out.println(func.applyAsDouble("sxIPX4ZAipVl3ZCkkqXqZw",
-         * db)); //Price is 4
-         */
-
-        System.out.println(db.kMeansClusters_json(40));
+        // System.out.println(db.kMeansClusters_json(40xwxw));
+    }
+    
+    //@Test
+    public void testPredictorFunc() throws IOException {
+        MP5Db<Restaurant> db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+        
+        ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("_NH7Cpq3qZkByP5xR4gXog");
+        
+        System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
     }
 
     // @Test
@@ -53,7 +59,7 @@ public class CustomTests {
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 
-    //@Test
+    // @Test
     public void testANTLR() {
 
         CharStream stream = new ANTLRInputStream(
@@ -70,19 +76,19 @@ public class CustomTests {
         // Create a parser that feeds of the token buffer
 
         QueryParser parser = new QueryParser(tokens);
-        
+
         ParseTree tree = parser.root();
-        
-        //TEXTUAL VIEW//
+
+        // TEXTUAL VIEW//
         System.err.println(tree.toStringTree(parser));
-        
-        //LISTENER SETUP//
+
+        // LISTENER SETUP//
         ParseTreeWalker walker = new ParseTreeWalker();
         QueryListener listener = new QueryCreator();
         walker.walk(listener, tree);
-        
-        //VISUALIZATION//
-        
+
+        // VISUALIZATION//
+
         // show AST in GUI
         JFrame frame = new JFrame("Antlr AST");
         JPanel panel = new JPanel();
