@@ -5,7 +5,18 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.ToDoubleBiFunction;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
 import com.google.gson.*;
+
+import ca.ece.ubc.cpen221.parser.QueryLexer;
+import ca.ece.ubc.cpen221.parser.QueryListener;
+import ca.ece.ubc.cpen221.parser.QueryParser;
 
 public class YelpDB implements MP5Db<Restaurant> {
 
@@ -116,7 +127,18 @@ public class YelpDB implements MP5Db<Restaurant> {
     @Override
     public Set<Restaurant> getMatches(String queryString) {
         // TODO Auto-generated method stub
-        return null;
+        @SuppressWarnings("deprecation")
+        CharStream stream = new ANTLRInputStream(queryString);
+        QueryLexer lexer = new QueryLexer(stream);
+        TokenStream tokens = new CommonTokenStream(lexer);
+        QueryParser parser = new QueryParser(tokens);
+        ParseTree tree = parser.root();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        QueryListener listener = new QueryCreator();
+        walker.walk(listener, tree);
+
+        Set<Restaurant> matches = new HashSet<Restaurant>();
+        return matches;
     }
 
     /**
@@ -318,7 +340,17 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     public String querySearch(String query) {
-        return null;
+        Set<Restaurant> matching;
+        try {
+            matching = getMatches(query);
+        } catch (IllegalArgumentException e) {
+            return "ERR: INVALID_QUERY";
+        }
+        if (matching.isEmpty()) {
+            return "ERR: NO_MATCH";
+        } else {
+            return gson.toJson(matching);
+        }
     }
 
     /** HELPER METHODS **/

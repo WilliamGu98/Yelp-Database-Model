@@ -1,7 +1,6 @@
 package ca.ece.ubc.cpen221.mp5;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class Restaurant extends Business {
 

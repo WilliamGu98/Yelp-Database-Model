@@ -1,4 +1,5 @@
 package ca.ece.ubc.cpen221.mp5;
+import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import ca.ece.ubc.cpen221.parser.*;
@@ -15,7 +16,7 @@ public class QueryCreator extends QueryBaseListener{
         TerminalNode token = ctx.STRING();
         String text = token.getText();
         
-        System.err.println(text);
+        //System.err.println(text);
     }
     
     @Override
@@ -23,7 +24,7 @@ public class QueryCreator extends QueryBaseListener{
         TerminalNode token = ctx.STRING();
         String text = token.getText();
         
-        System.err.println(text);
+        //System.err.println(text);
     }
     
     @Override
@@ -31,7 +32,7 @@ public class QueryCreator extends QueryBaseListener{
         TerminalNode token = ctx.STRING();
         String text = token.getText();
         
-        System.err.println(text);
+        //System.err.println(text);
     }
     
     @Override
@@ -39,7 +40,7 @@ public class QueryCreator extends QueryBaseListener{
         TerminalNode token = ctx.NUM();
         String text = token.getText();
         
-        System.err.println(text);
+        //System.err.println(text);
     }
     
     @Override
@@ -47,6 +48,14 @@ public class QueryCreator extends QueryBaseListener{
         TerminalNode token = ctx.NUM();
         String text = token.getText();
         
-        System.err.println(text);
+        //System.err.println(text);
+    }
+    
+    /**
+     * Throws an exception if the given query has an error
+     */
+    @Override
+    public void visitErrorNode(ErrorNode node) { 
+        throw new IllegalArgumentException();
     }
 }
