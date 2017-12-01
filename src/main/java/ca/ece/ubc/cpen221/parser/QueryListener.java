@@ -40,6 +40,16 @@ public interface QueryListener extends ParseTreeListener {
 	 */
 	void exitAndExpr(QueryParser.AndExprContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QueryParser#comparator}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparator(QueryParser.ComparatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#comparator}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparator(QueryParser.ComparatorContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QueryParser#atom}.
 	 * @param ctx the parse tree
 	 */
@@ -50,63 +60,53 @@ public interface QueryListener extends ParseTreeListener {
 	 */
 	void exitAtom(QueryParser.AtomContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#ineq}.
+	 * Enter a parse tree produced by {@link QueryParser#inExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterIneq(QueryParser.IneqContext ctx);
+	void enterInExpr(QueryParser.InExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryParser#ineq}.
+	 * Exit a parse tree produced by {@link QueryParser#inExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitIneq(QueryParser.IneqContext ctx);
+	void exitInExpr(QueryParser.InExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#in}.
+	 * Enter a parse tree produced by {@link QueryParser#categoryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterIn(QueryParser.InContext ctx);
+	void enterCategoryExpr(QueryParser.CategoryExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryParser#in}.
+	 * Exit a parse tree produced by {@link QueryParser#categoryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitIn(QueryParser.InContext ctx);
+	void exitCategoryExpr(QueryParser.CategoryExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#category}.
+	 * Enter a parse tree produced by {@link QueryParser#ratingExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterCategory(QueryParser.CategoryContext ctx);
+	void enterRatingExpr(QueryParser.RatingExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryParser#category}.
+	 * Exit a parse tree produced by {@link QueryParser#ratingExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitCategory(QueryParser.CategoryContext ctx);
+	void exitRatingExpr(QueryParser.RatingExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#rating}.
+	 * Enter a parse tree produced by {@link QueryParser#priceExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterRating(QueryParser.RatingContext ctx);
+	void enterPriceExpr(QueryParser.PriceExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryParser#rating}.
+	 * Exit a parse tree produced by {@link QueryParser#priceExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitRating(QueryParser.RatingContext ctx);
+	void exitPriceExpr(QueryParser.PriceExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#price}.
+	 * Enter a parse tree produced by {@link QueryParser#nameExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterPrice(QueryParser.PriceContext ctx);
+	void enterNameExpr(QueryParser.NameExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryParser#price}.
+	 * Exit a parse tree produced by {@link QueryParser#nameExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitPrice(QueryParser.PriceContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link QueryParser#name}.
-	 * @param ctx the parse tree
-	 */
-	void enterName(QueryParser.NameContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryParser#name}.
-	 * @param ctx the parse tree
-	 */
-	void exitName(QueryParser.NameContext ctx);
+	void exitNameExpr(QueryParser.NameExprContext ctx);
 }

@@ -16,10 +16,15 @@ import com.google.gson.JsonSyntaxException;
  */
 public class YelpDBServer {
 
-    private ServerSocket serverSocket;
-    private YelpDB yelpDB; // Wraps a yelp database
+    /**
+     * Abstraction Function: Represents a yelp data base server, which holds data
+     * about restaurants, users, and reviews, and can handle specific requests from
+     * clients that connect the server
+     */
 
-    // Rep invariant: serverSocket != null
+    /* Rep invariant */
+    private ServerSocket serverSocket; // serverSocket != null
+    private YelpDB yelpDB; // Wraps a non-null yelp database
 
     /**
      * Make a FibonacciServerMulti that listens for connections on port.
@@ -112,14 +117,14 @@ public class YelpDBServer {
     /**
      * Parses a request from a client (there are 5 different possible requests)
      * 
-     * @param input
+     * @param request
      *            from client
-     * @return a response from the server
+     * @return a response from the server, depending on the request
      */
-    public String requestParser(String input) {
+    public String requestParser(String request) {
 
-        input = input.trim();
-        String[] words = input.split(" +", 2); // Split client request into two words
+        request = request.trim();
+        String[] words = request.split(" +", 2); // Split client request into two words
 
         String command = words[0];
         String data = words[1];

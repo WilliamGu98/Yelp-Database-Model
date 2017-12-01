@@ -18,6 +18,7 @@ import ca.ece.ubc.cpen221.parser.QueryLexer;
 import ca.ece.ubc.cpen221.parser.QueryListener;
 import ca.ece.ubc.cpen221.parser.QueryParser;
 
+@SuppressWarnings("deprecation")
 public class YelpDB implements MP5Db<Restaurant> {
 
     /**
@@ -26,13 +27,14 @@ public class YelpDB implements MP5Db<Restaurant> {
      * supports several operations
      */
 
+    /* Rep Invariants */
     private ConcurrentMap<String, Restaurant> restaurantMap; // Maps a Business_id -> Restaurant. The business id should
                                                              // match that of the restaurant
     private ConcurrentMap<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of
                                                      // the review
     private ConcurrentMap<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that
                                                      // of the user id
-    Gson gson; // For JSON parsing
+    private Gson gson; // For JSON parsing
 
     /**
      * Constructor for a yelp database
@@ -127,7 +129,8 @@ public class YelpDB implements MP5Db<Restaurant> {
     @Override
     public Set<Restaurant> getMatches(String queryString) {
         // TODO Auto-generated method stub
-        @SuppressWarnings("deprecation")
+
+        /* Setup grammar listener */
         CharStream stream = new ANTLRInputStream(queryString);
         QueryLexer lexer = new QueryLexer(stream);
         TokenStream tokens = new CommonTokenStream(lexer);
@@ -137,14 +140,26 @@ public class YelpDB implements MP5Db<Restaurant> {
         QueryListener listener = new QueryCreator();
         walker.walk(listener, tree);
 
+        // The listener should be able to construct a custom search query that we can
+        // retrieve
+        // using some method. Need to add the creation of this query to QueryCreator.
+        
+        // This custom search query should be a recursive datatype that takes in a restaurant
+        // as its entrypoint, and then returns true/false. 
+
         Set<Restaurant> matches = new HashSet<Restaurant>();
+        
+        // Look through every restaurant, if one matches query add it to the set
+        for (Restaurant r : this.restaurantMap.values()) {
+            
+        }
+
         return matches;
     }
 
     /**
      * Cluster objects into k clusters using k-means clustering. The resulting
-     * clusters are restaurants identified by their business ID. If k = 0, then no
-     * clusters are created
+     * clusters are restaurants identified by their business ID.
      * 
      * @param k
      *            number of clusters to create (0 < k <= number of objects)
@@ -261,16 +276,15 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @return returns a string in JSON format of the restaurant info
      */
     public String getRestaurantJSON(String rID) {
-
         return gson.toJson(this.restaurantMap.get(rID));
     }
 
     /**
-     * Adds a new user to the database given user info in json format
+     * Attempts to add a new user to the database given user info in json format
      * 
      * @param jsonInfo
      *            string in json format that represents new user
-     * @modifies this database by adding a new user
+     * @modifies this database by adding a new user if the new user info is valid
      * @return the json format info of the newly added user
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if the name field is null
@@ -287,11 +301,13 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Adds a new restaurant to the database given restaurant info in json format
+     * Attempts to add a new restaurant to the database given restaurant info in
+     * json format
      * 
      * @param jsonInfo
      *            string in json format that represents new user
-     * @modifies this database by adding a new restaurant
+     * @modifies this database by adding a new restaurant if the new restaurant info
+     *           is valid
      * @return the json format info of the newly added restaurant
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if any required fields for
@@ -310,10 +326,17 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Adds a new review
+     * Attempts to add a new review to the database given review info in json format
      * 
      * @param jsonInfo
-     * @return
+     *            string in json format that represents new review
+     * @modifies this database by adding a new review if review is valid
+     * @return the json format info of the newly added review if valid. If the
+     *         review refers to a restaurant or user that does not exist in this
+     *         database, return a corresponding error message
+     * @throws JsonSyntaxException
+     *             if jsonInfo is not in proper json format or if any required
+     *             fields for review are null
      */
     public String addReviewJSON(String jsonInfo) throws JsonSyntaxException {
         Review review = gson.fromJson(jsonInfo, Review.class);
@@ -333,12 +356,27 @@ public class YelpDB implements MP5Db<Restaurant> {
         }
         // Valid json review with valid restaurant and user references
         else {
-            review.generateNewReviewInfo(this);
-            this.reviewMap.put(review.getID(), review);
+            review.generateNewReviewInfo(this); //Generate new review info
+            this.reviewMap.put(review.getID(), review); //Add the review to our review map
+            this.userMap.get(review.getUserId()).incrementReview(); // Increase corresponding user review count by 1
             return gson.toJson(review);
         }
     }
 
+    /**
+     * Performs a query search of restaurants on this database, based on parameters
+     * specified in query
+     * 
+     * @param query
+     *            a string that represents the characteristics of restaurant(s) we
+     *            want to look for. For querySearch to be successful, the query
+     *            string should be in proper grammatical format. One example of a
+     *            properly formatted string is: in(Telegraph Ave) &&
+     *            (category(Chinese) || category(Italian)) && price <= 2
+     * @return a string that represents the json info of any matching restaurants
+     *         specified by the query, or an error message if the query string is
+     *         invalid or no matching restaurants are found
+     */
     public String querySearch(String query) {
         Set<Restaurant> matching;
         try {
@@ -614,7 +652,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Finds an empty set, if none exist return null
+     * Finds an empty cluster, if none exist return null
      * 
      * @param kMeansClusters
      * @return
@@ -628,6 +666,12 @@ public class YelpDB implements MP5Db<Restaurant> {
         return null;
     }
 
+    /**
+     * Finds the largest cluster
+     * 
+     * @param kMeansClusters
+     * @return
+     */
     private Set<String> findLargestCluster(List<Set<String>> kMeansClusters) {
         int maxSize = 0;
         Set<String> largestCluster = null;
@@ -640,6 +684,13 @@ public class YelpDB implements MP5Db<Restaurant> {
         return largestCluster;
     }
 
+    /**
+     * Helper method that splits a given cluster of restaurants, in set format
+     * containing the restaurant IDs, into two new clusters
+     * 
+     * @param clusterToSplit
+     * @return
+     */
     private Map<double[], Set<String>> splitCluster(Set<String> clusterToSplit) {
         // Find the min and max latitudes and longitudes
         double minLat = Double.MAX_VALUE;
@@ -727,7 +778,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Generates a new user ID
+     * Generates a new user ID that does not yet exist in the database
      * 
      * @return the new user id
      */
@@ -742,7 +793,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Generates a new restaurant ID
+     * Generates a new restaurant ID that does not yet exist in the database
      * 
      * @return the new restaurant id
      */
@@ -756,6 +807,11 @@ public class YelpDB implements MP5Db<Restaurant> {
         return restID;
     }
 
+    /**
+     * Generates a new review ID that does not yet exist in the database
+     * 
+     * @return the new restaurant id
+     */
     protected String generateReviewID() {
         Random r = new Random();
         String restID;

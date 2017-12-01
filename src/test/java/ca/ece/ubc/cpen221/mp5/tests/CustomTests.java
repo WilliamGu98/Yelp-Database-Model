@@ -57,15 +57,17 @@ public class CustomTests {
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 
-    @Test
+    // @Test
     public void querySearch() throws IOException {
         YelpDBServer serv = new YelpDBServer(7777);
         System.out.println(serv.requestParser(
                 "QUERY in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 3 || price >=4) && (rating>2)"));
     }
 
-    // @Test
+    @Test
     public void testANTLR() {
+        
+        //https://stackoverflow.com/questions/30976962/nested-boolean-expression-parser-using-antlr
 
         @SuppressWarnings("deprecation")
         CharStream stream = new ANTLRInputStream(
@@ -95,15 +97,20 @@ public class CustomTests {
 
         // VISUALIZATION//
         // show AST in GUI
-        /*
-         * JFrame frame = new JFrame("Antlr AST"); JPanel panel = new JPanel();
-         * TreeViewer viewr = new TreeViewer(Arrays.asList(parser.getRuleNames()),
-         * tree); viewr.setScale(1.5);// scale a little
-         * 
-         * panel.add(viewr); frame.add(panel);
-         * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); frame.setSize(500,
-         * 500); frame.setVisible(true); while (true) ;
-         */
+        
+        JFrame frame = new JFrame("Antlr AST");
+        JPanel panel = new JPanel();
+        TreeViewer viewr = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+        viewr.setScale(1.5);// scale a little
+
+        panel.add(viewr);
+        frame.add(panel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 500);
+        frame.setVisible(true);
+        while (true)
+            ;
+
     }
 
 }

@@ -25,6 +25,10 @@ public class YelpUser extends User {
     public double getAverageStars() {
         return this.average_stars;
     }
+    
+    public void incrementReview() {
+        this.review_count++;
+    }
 
     /**
      * Adds all fields required for a new user. Also modifies db by this user to the
