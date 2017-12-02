@@ -16,7 +16,7 @@ public class LeastSquaresTest {
 	@Test
 	public void equalityTest1() throws IOException {
 		double delta = 0.0001;
-		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+		MP5Db<Restaurant> myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
 		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("fL8ujZ89qTyhbjr1Qz5aSg");
 		
 		double result0 = myFunction.applyAsDouble(myDatabase, "1E2MQLWfwpsId185Fs2gWw"); //price is 1
