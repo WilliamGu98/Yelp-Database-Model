@@ -471,14 +471,16 @@ public class YelpDB implements MP5Db<Restaurant> {
 
         // Create a number of centroids equal to k
         for (int i = 0; i < k; i++) {
-            // generate random centroid based on min and max lattitudes
+            // generate random centroid based on min and max latitudes
             // and longitudes, with (currently) no assigned restaurants
             HashSet<String> emptySet = new HashSet<String>();
             restaurantClusters.put(this.generateRandomCentroid(minLat, maxLat, minLon, maxLon), emptySet);
         }
 
         // Assign each restaurant to its closest centroid
+
         for (String rID : restaurantIDs) {
+
             double[] newCentroid = null;
             double minDist = Double.MAX_VALUE;
 
@@ -671,13 +673,14 @@ public class YelpDB implements MP5Db<Restaurant> {
                 formattedClusters.add(cluster);
             }
         }
+        
         return gson.toJson(formattedClusters);
     }
 
     /**
      * Helper class to convert restaurant clusters to JSON format
      */
-    private class RestaurantCluster {
+    protected class RestaurantCluster {
 
         private double x;
         private double y;
@@ -691,6 +694,13 @@ public class YelpDB implements MP5Db<Restaurant> {
             this.x = lattitude;
             this.y = longitude;
             this.weight = 1.0;
+        }
+        
+        public double getRestaurantClusterX() {
+        	return this.x;
+        }
+        public double getRestaurantClusterY() {
+        	return this.y;
         }
     }
 
