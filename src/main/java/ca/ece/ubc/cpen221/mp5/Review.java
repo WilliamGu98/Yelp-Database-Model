@@ -1,22 +1,23 @@
 package ca.ece.ubc.cpen221.mp5;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Review implements DataEntry {
-    private String review_id;
-    private String type;
-    private String business_id;
-    private Map votes;
-    private String text;
-    private int stars;
-    private String user_id;
-    private String date;
+    protected String review_id;
+    protected String type;
+    protected String business_id;
+    protected Map<String, Integer> votes;
+    protected String text;
+    protected int stars;
+    protected String user_id;
+    protected String date;
 
     public String getUserId() {
         return this.user_id;
     }
 
-    public int getRating() {
+    public int getStars() {
         return this.stars;
     }
 
@@ -35,9 +36,16 @@ public class Review implements DataEntry {
     public String getDate() {
         return this.date;
     }
+    
+    public void generateNewReviewInfo(YelpDB db) {
+        this.type = "review";
+        this.date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        
+        this.review_id = db.generateReviewID();
+    }
 
     @Override
-    public String toString() {
+    public String getID() {
         return this.review_id;
     }
 

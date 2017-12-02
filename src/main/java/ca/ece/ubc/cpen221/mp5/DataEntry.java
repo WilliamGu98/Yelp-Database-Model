@@ -8,6 +8,6 @@ public interface DataEntry {
      * Get a unique string representation for the data entry
      * @return a string representation
      */
-    public String toString();
+    public String getID();
 
 }
