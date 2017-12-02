@@ -143,15 +143,16 @@ public class YelpDB implements MP5Db<Restaurant> {
         // The listener should be able to construct a custom search query that we can
         // retrieve
         // using some method. Need to add the creation of this query to QueryCreator.
-        
-        // This custom search query should be a recursive datatype that takes in a restaurant
-        // as its entrypoint, and then returns true/false. 
+
+        // This custom search query should be a recursive datatype that takes in a
+        // restaurant
+        // as its entrypoint, and then returns true/false.
 
         Set<Restaurant> matches = new HashSet<Restaurant>();
-        
+
         // Look through every restaurant, if one matches query add it to the set
         for (Restaurant r : this.restaurantMap.values()) {
-            
+
         }
 
         return matches;
@@ -180,38 +181,59 @@ public class YelpDB implements MP5Db<Restaurant> {
         // restaurants (in id form)
         Map<double[], Set<String>> restaurantClusters = this.initiateClusters(k, this.restaurantMap.keySet());
 
-        // Flag is true if any restaurants are reassigned to a new centroid
-        // If no restaurants are reassigned, then we are done
-        boolean flag;
-        do {
-            this.reassignCentroids(restaurantClusters);
-            flag = reassignRestaurants(restaurantClusters, this.restaurantMap.keySet());
-        } while (flag);
+        // DO WHILE LOOP HERE, WHILE THERE ARE NO EMPTY CLUSTERS
 
-        // Add final restaurant clusters to list
+        do {
+            Set<String> emptyCluster = findEmptyCluster(restaurantClusters);
+            Set<String> largestCluster = findLargestCluster(restaurantClusters);
+
+            // Code below finds some random centroid within the largest cluster
+            double minLat = Double.MAX_VALUE;
+            double minLon = Double.MAX_VALUE;
+            double maxLat = -Double.MAX_VALUE;
+            double maxLon = -Double.MAX_VALUE;
+            for (String rID : largestCluster) {
+                double lat = this.getRestaurant(rID).getLatitude();
+                double lon = this.getRestaurant(rID).getLongitude();
+                if (lat < minLat) {
+                    minLat = lat;
+                }
+                if (lat > maxLat) {
+                    maxLat = lat;
+                }
+                if (lon < minLon) {
+                    minLon = lon;
+                }
+                if (lon > maxLon) {
+                    maxLon = lon;
+                }
+            }
+            double[] centroidInLargestCluster = this.generateRandomCentroid(minLat, maxLat, minLon, maxLon);
+
+            // Find the empty cluster and reassign its centroid by placing it somewhere in
+            // the largest cluster
+            for (double[] centroid : restaurantClusters.keySet()) {
+                if (restaurantClusters.get(centroid).equals(emptyCluster)) {
+                    centroid[0] = centroidInLargestCluster[0]; // New longitude based on largest cluster
+                    centroid[1] = centroidInLargestCluster[1]; // New latitude based on largest cluster
+                    break; // Once we find the empty cluster, we are done
+                }
+            }
+
+            // Flag is true if any restaurants are reassigned to a new centroid
+            // If no restaurants are reassigned, then we are done one run through
+            boolean flag;
+            do {
+                this.reassignCentroids(restaurantClusters);
+                flag = reassignRestaurants(restaurantClusters, this.restaurantMap.keySet());
+            } while (flag);
+
+        } while (atLeastOneEmptyCluster(restaurantClusters)); // Repeat if any empty clusters are detected
+
+        // Add final restaurant clusters to list of clusters
         for (Set<String> cluster : restaurantClusters.values()) {
             kMeansClusters.add(cluster);
         }
-
-        // Get rid of empty clusters by splitting large clusters
-        while (atLeastOneEmptyCluster(kMeansClusters)) {
-            // Find one empty set and remove it from the list of clusters
-            Set<String> emptyCluster = findEmptyCluster(kMeansClusters);
-            kMeansClusters.remove(emptyCluster);
-
-            // Find largest set and remove it from the list of clusters
-            Set<String> largestCluster = findLargestCluster(kMeansClusters);
-            kMeansClusters.remove(largestCluster);
-
-            // Attempt to split largest cluster (Use the first two restaurants as centers)
-            Map<double[], Set<String>> splitClusters = splitCluster(largestCluster);
-
-            // Add final split clusters back into original list
-            for (Set<String> newSplitCluster : splitClusters.values()) {
-                kMeansClusters.add(newSplitCluster);
-            }
-        }
-
         return this.clusterToJSON(kMeansClusters);
     }
 
@@ -261,7 +283,14 @@ public class YelpDB implements MP5Db<Restaurant> {
         ToDoubleBiFunction<MP5Db<Restaurant>, String> function = (database, restaurantID) -> {
             // Function logic
             double price = ((YelpDB) database).getRestaurant(restaurantID).getPrice();
-            return a + b * price;
+            double ratingPrediction = a + b * price;
+            if (ratingPrediction > 5) {
+                return 5;
+            } else if (ratingPrediction < 1) {
+                return 1;
+            } else {
+                return ratingPrediction;
+            }
         };
 
         return function;
@@ -316,7 +345,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
         // Check if any required fields are null
-        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1) {
+        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1 || rest.getFullAddress() == null) {
             throw new JsonSyntaxException(jsonInfo);
         }
         rest.generateNewRestaurantInfo(this);
@@ -355,10 +384,11 @@ public class YelpDB implements MP5Db<Restaurant> {
         }
         // Valid json review with valid restaurant and user references
         else {
-            review.generateNewReviewInfo(this); //Generate new review info
-            this.reviewMap.put(review.getID(), review); //Add the review to our review map
+            review.generateNewReviewInfo(this); // Generate new review info
+            this.reviewMap.put(review.getID(), review); // Add the review to our review map
             this.userMap.get(review.getUserId()).updateWithNewReview(review); // Update user info with new review info
-            this.restaurantMap.get(review.getBusinessId()).updateWithNewReview(review); // Update restaurant info with new review info
+            this.restaurantMap.get(review.getBusinessId()).updateWithNewReview(review); // Update restaurant info with
+                                                                                        // new review info
             return gson.toJson(review);
         }
     }
@@ -644,8 +674,8 @@ public class YelpDB implements MP5Db<Restaurant> {
         }
     }
 
-    private boolean atLeastOneEmptyCluster(List<Set<String>> kMeansClusters) {
-        for (Set<String> cluster : kMeansClusters) {
+    private boolean atLeastOneEmptyCluster(Map<double[], Set<String>> restaurantClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.isEmpty()) {
                 return true;
             }
@@ -659,8 +689,8 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @param kMeansClusters
      * @return
      */
-    private Set<String> findEmptyCluster(List<Set<String>> kMeansClusters) {
-        for (Set<String> cluster : kMeansClusters) {
+    private Set<String> findEmptyCluster(Map<double[], Set<String>> restaurantClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.isEmpty()) {
                 return cluster;
             }
@@ -674,68 +704,16 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @param kMeansClusters
      * @return
      */
-    private Set<String> findLargestCluster(List<Set<String>> kMeansClusters) {
+    private Set<String> findLargestCluster(Map<double[], Set<String>> restaurantClusters) {
         int maxSize = 0;
         Set<String> largestCluster = null;
-        for (Set<String> cluster : kMeansClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.size() > maxSize) {
                 largestCluster = cluster;
                 maxSize = cluster.size();
             }
         }
         return largestCluster;
-    }
-
-    /**
-     * Helper method that splits a given cluster of restaurants, in set format
-     * containing the restaurant IDs, into two new clusters
-     * 
-     * @param clusterToSplit
-     * @return
-     */
-    private Map<double[], Set<String>> splitCluster(Set<String> clusterToSplit) {
-        // Find the min and max latitudes and longitudes
-        double minLat = Double.MAX_VALUE;
-        double minLon = Double.MAX_VALUE;
-        double maxLat = -Double.MAX_VALUE;
-        double maxLon = -Double.MAX_VALUE;
-
-        for (String rID : clusterToSplit) {
-            double lat = this.getRestaurant(rID).getLatitude();
-            double lon = this.getRestaurant(rID).getLongitude();
-            if (lat < minLat) {
-                minLat = lat;
-            }
-            if (lat > maxLat) {
-                maxLat = lat;
-            }
-            if (lon < minLon) {
-                minLon = lon;
-            }
-            if (lon > maxLon) {
-                maxLon = lon;
-            }
-        }
-        double[] centroid1 = new double[] { minLat, minLon };
-        double[] centroid2 = new double[] { maxLat, maxLon };
-
-        Map<double[], Set<String>> splitClusters = new HashMap<double[], Set<String>>();
-        splitClusters.put(centroid1, new HashSet<String>());
-        splitClusters.put(centroid2, new HashSet<String>());
-
-        for (String rID : clusterToSplit) {
-            double dist1 = computeDistance(centroid1, this.getRestaurant(rID));
-            double dist2 = computeDistance(centroid2, this.getRestaurant(rID));
-
-            if (dist1 <= dist2) {
-                splitClusters.get(centroid1).add(rID);
-            } else {
-                splitClusters.get(centroid2).add(rID);
-            }
-
-        }
-
-        return splitClusters;
     }
 
     /**
@@ -756,7 +734,7 @@ public class YelpDB implements MP5Db<Restaurant> {
                 formattedClusters.add(cluster);
             }
         }
-        
+
         return gson.toJson(formattedClusters);
     }
 
@@ -778,12 +756,13 @@ public class YelpDB implements MP5Db<Restaurant> {
             this.y = longitude;
             this.weight = 1.0;
         }
-        
+
         public double getRestaurantClusterX() {
-        	return this.x;
+            return this.x;
         }
+
         public double getRestaurantClusterY() {
-        	return this.y;
+            return this.y;
         }
     }
 
