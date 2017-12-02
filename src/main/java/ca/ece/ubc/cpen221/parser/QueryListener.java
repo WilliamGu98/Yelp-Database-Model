@@ -40,16 +40,6 @@ public interface QueryListener extends ParseTreeListener {
 	 */
 	void exitAndExpr(QueryParser.AndExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link QueryParser#comparator}.
-	 * @param ctx the parse tree
-	 */
-	void enterComparator(QueryParser.ComparatorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryParser#comparator}.
-	 * @param ctx the parse tree
-	 */
-	void exitComparator(QueryParser.ComparatorContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link QueryParser#atom}.
 	 * @param ctx the parse tree
 	 */
