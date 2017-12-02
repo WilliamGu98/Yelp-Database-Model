@@ -14,32 +14,62 @@ import ca.ece.ubc.cpen221.operators.*;
 
 public class QueryCreator extends QueryBaseListener {
 
-    private RestaurantHandle r; // Eventually need to return this so we have something to keep changing (think
-    // of it as a handle)
+    private RestaurantHandle r; // Allows us to switch between restaurants to be tested by the booleanExp.
 
-    private Stack<Expression> expressionStack = new Stack<Expression>(); // Whenever we make a terminal expression put
-                                                                         // it on the stack
-    // Whenever we exit an AND/OR expression, make a chain of expressions depending
-    // on the number of expressions at that level
-    // Then push the resultant expression back on the stack
-    // At the end, there should be a single expression on the stack which represents
-    // the final expression we can use
+    // This stack helps us construct the boolean tree expression. Every time we exit
+    // a terminal boolean expression,
+    // it is pushed to this stack. Whenever a binary (OR/AND) expression is exited,
+    // we pop the stack and form
+    // a single OR/AND expression depending on the number of operators specified,
+    // and repush it onto the stack. At the
+    // end of the walkthrough, there will be a final expression on the stack that
+    // represents the final boolean tree.
+    private Stack<Expression> expressionStack = new Stack<Expression>();
 
     private Expression booleanExp;
 
+    /**
+     * Evaluates the booleanExp tree for the restaurant that the handler contains at
+     * the time of execution
+     * 
+     * @return true if the restaurant from the handler matches the query and false
+     *         if it does not
+     */
     public boolean evaluateExpression() {
         return booleanExp.eval();
     }
 
+    /**
+     * Sets up the restaurant handle for the given booleanExp tree. This handle
+     * supports methods that allow different restaurants to be set, allowing the
+     * booleanExp to be able to quickly re-evaluate different restaurants. Note that
+     * this handle should be set before the query creator walks through a given
+     * query string.
+     * 
+     * @param r
+     *            the restaurant handle that one has access to, allowing one to test
+     *            the booleanExp tree for different restaurants
+     */
     public void setRestaurantHandle(RestaurantHandle r) {
         this.r = r;
     }
 
+    /**
+     * When the root expression context is exited, the final expression left on the
+     * stack is popped and represents the final booleanExp tree that we can use to
+     * evaluate if a given restaurant matches a query string.
+     */
     @Override
     public void exitRoot(RootContext ctx) {
         this.booleanExp = expressionStack.pop();
     }
 
+    /**
+     * When an and expression context is exited, an AND expression tree is formed by
+     * popping a certain number of expressions from the stack depending on how many
+     * terms the context specifies. The resulting AND expression is pushed back onto
+     * the stack.
+     */
     @Override
     public void exitAndExpr(AndExprContext ctx) {
         List<TerminalNode> tokens = ctx.AND();
@@ -58,6 +88,12 @@ public class QueryCreator extends QueryBaseListener {
         }
     }
 
+    /**
+     * When an or expression context is exited, an OR expression tree is formed by
+     * popping a certain number of expressions from the stack depending on how many
+     * terms the context specifies. The resulting OR expression is pushed back onto
+     * the stack.
+     */
     @Override
     public void exitOrExpr(OrExprContext ctx) {
         List<TerminalNode> tokens = ctx.OR();
@@ -76,6 +112,10 @@ public class QueryCreator extends QueryBaseListener {
         }
     }
 
+    /**
+     * When a category expression context is exited, a corresponding category
+     * expression is formed and pushed onto the expression stack
+     */
     @Override
     public void exitCategoryExpr(CategoryExprContext ctx) {
         TerminalNode token = ctx.STRING();
@@ -85,6 +125,10 @@ public class QueryCreator extends QueryBaseListener {
         expressionStack.push(exp);
     }
 
+    /**
+     * When an in expression context is exited, a corresponding in expression is
+     * formed and pushed onto the expression stack
+     */
     @Override
     public void exitInExpr(InExprContext ctx) {
         TerminalNode token = ctx.STRING();
@@ -94,6 +138,10 @@ public class QueryCreator extends QueryBaseListener {
         expressionStack.push(exp);
     }
 
+    /**
+     * When a name expression context is exited, a corresponding name expression is
+     * formed and pushed onto the expression stack
+     */
     @Override
     public void exitNameExpr(NameExprContext ctx) {
         TerminalNode token = ctx.STRING();
@@ -103,6 +151,10 @@ public class QueryCreator extends QueryBaseListener {
         expressionStack.push(exp);
     }
 
+    /**
+     * When a rating expression context is exited, a corresponding rating expression
+     * is formed and pushed onto the expression stack
+     */
     @Override
     public void exitRatingExpr(RatingExprContext ctx) {
 
@@ -116,6 +168,10 @@ public class QueryCreator extends QueryBaseListener {
         expressionStack.push(exp);
     }
 
+    /**
+     * When a price expression context is exited, a corresponding price expression
+     * is formed and pushed onto the expression stack
+     */
     @Override
     public void exitPriceExpr(PriceExprContext ctx) {
 

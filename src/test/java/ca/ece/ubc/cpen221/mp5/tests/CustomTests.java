@@ -57,7 +57,7 @@ public class CustomTests {
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 
-    @Test
+    //@Test
     public void querySearch() throws IOException {
         YelpDBServer serv = new YelpDBServer(7777);
         System.out.println(serv.requestParser(
