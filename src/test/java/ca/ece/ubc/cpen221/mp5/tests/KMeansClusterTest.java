@@ -101,7 +101,7 @@ public class KMeansClusterTest {
 	public void test1() throws IOException {
 
 		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-		int k = 5;
+		int k = 50;
 		String s1 = myDatabase.kMeansClusters_json(k);
 		List<double[]> centroidList = new ArrayList<double[]>();
 

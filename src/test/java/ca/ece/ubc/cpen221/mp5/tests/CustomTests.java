@@ -22,16 +22,16 @@ import com.google.gson.*;
 
 public class CustomTests {
 
-    // @Test
+    @Test
     public void test() throws IOException {
         MP5Db<Restaurant> db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
 
-        ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
-        System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
-        System.out.println(func.applyAsDouble(db, "h_we4E3zofRTf4G0JTEF0A")); // Price is 3
-        System.out.println(func.applyAsDouble(db, "sxIPX4ZAipVl3ZCkkqXqZw")); // Price is 4
+        //ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
+        //System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
+        //System.out.println(func.applyAsDouble(db, "h_we4E3zofRTf4G0JTEF0A")); // Price is 3
+        //System.out.println(func.applyAsDouble(db, "sxIPX4ZAipVl3ZCkkqXqZw")); // Price is 4
 
-        // System.out.println(db.kMeansClusters_json(40xwxw));
+        System.out.println(db.kMeansClusters_json(30));
     }
 
     // @Test
@@ -64,7 +64,7 @@ public class CustomTests {
                 "QUERY in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 3 || price >=4) && (rating>2)"));
     }
 
-    @Test
+    //@Test
     public void testANTLR() {
         
         //https://stackoverflow.com/questions/30976962/nested-boolean-expression-parser-using-antlr

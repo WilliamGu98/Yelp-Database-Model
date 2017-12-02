@@ -100,9 +100,6 @@ public class Restaurant extends Business {
         if (this.schools == null) {
             this.schools = new String[] {};
         }
-        if (this.full_address == null) {
-            this.full_address = "";
-        }
         this.business_id = db.generateRestaurantID();
         this.url = "http://www.yelp.com/restaurant_details?businessid=" + this.business_id;
         this.photo_url = "http://www.yelp.com/restaurant_photos?businessid=" + this.business_id;
