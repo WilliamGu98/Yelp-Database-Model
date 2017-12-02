@@ -64,7 +64,7 @@ public class CustomTests {
                 "QUERY in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 3 || price >=4) && (rating>2)"));
     }
 
-    @Test
+    //@Test
     public void testANTLR() {
         
         //https://stackoverflow.com/questions/30976962/nested-boolean-expression-parser-using-antlr
