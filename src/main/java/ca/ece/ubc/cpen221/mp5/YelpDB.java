@@ -316,8 +316,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
         // Check if any required fields are null
-        if (rest.getCity() == null || rest.getState() == null || rest.getName() == null
-                || rest.getFullAddress() == null) {
+        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1) {
             throw new JsonSyntaxException(jsonInfo);
         }
         rest.generateNewRestaurantInfo(this);
@@ -344,7 +343,7 @@ public class YelpDB implements MP5Db<Restaurant> {
         // If any required fields are null, throw a JsonSyntaxException (Invalid review
         // format)
         if (review.getText() == null || review.getUserId() == null || review.getBusinessId() == null
-                || review.getStars() == 0) {
+                || review.getStars() > 5 || review.getStars() < 1) {
             throw new JsonSyntaxException(jsonInfo);
         }
         // We confirm if the review actually has a valid user id and restaurant id
@@ -358,7 +357,8 @@ public class YelpDB implements MP5Db<Restaurant> {
         else {
             review.generateNewReviewInfo(this); //Generate new review info
             this.reviewMap.put(review.getID(), review); //Add the review to our review map
-            this.userMap.get(review.getUserId()).incrementReview(); // Increase corresponding user review count by 1
+            this.userMap.get(review.getUserId()).updateWithNewReview(review); // Update user info with new review info
+            this.restaurantMap.get(review.getBusinessId()).updateWithNewReview(review); // Update restaurant info with new review info
             return gson.toJson(review);
         }
     }

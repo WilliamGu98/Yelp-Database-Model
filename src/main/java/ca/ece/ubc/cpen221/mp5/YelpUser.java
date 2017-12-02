@@ -26,8 +26,10 @@ public class YelpUser extends User {
         return this.average_stars;
     }
     
-    public void incrementReview() {
+    public void updateWithNewReview(Review r) {
+        double new_average_stars = (average_stars * review_count + r.getStars())/(review_count + 1);
         this.review_count++;
+        this.average_stars = new_average_stars;
     }
 
     /**
