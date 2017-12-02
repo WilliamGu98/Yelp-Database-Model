@@ -268,7 +268,8 @@ public class YelpDB implements MP5Db<Restaurant> {
             double ratingPrediction = a + b * price;
             if (ratingPrediction > 5) {
                 return 5;
-            } else if (ratingPrediction < 1) {
+            }
+            else if (ratingPrediction < 1) {
                 return 1;
             } else {
                 return ratingPrediction;

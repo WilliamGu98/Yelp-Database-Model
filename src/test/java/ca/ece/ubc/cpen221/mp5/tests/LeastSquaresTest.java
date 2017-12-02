@@ -94,16 +94,20 @@ public class LeastSquaresTest {
 	public void testValues1() throws IOException {
 		double delta = 0.0001;
 		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("fL8ujZ89qTyhbjr1Qz5aSg");
-		
+		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("QCTDMx5zXmu14JrZxbVhnQ");
+
 		double result0 = myFunction.applyAsDouble(myDatabase, "1E2MQLWfwpsId185Fs2gWw"); //price is 1
-		assertEquals(result0, 5.0000, delta);
+		assertEquals(result0, 3.5, delta);
 		double result3 = myFunction.applyAsDouble(myDatabase, "loBOs5ruFXSNL-ZM29cTrA"); //price is 2
-		assertEquals(result3, 3.0000, delta);
+		assertEquals(result3, 4.2, delta);
 		double result6 = myFunction.applyAsDouble(myDatabase, "h_we4E3zofRTf4G0JTEF0A"); //price is 3
-		assertEquals(result6, 1.0000, delta);
+		assertEquals(result6, 4.9, delta);
 		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
-		assertEquals(result9, 1.0000, delta);
+		assertEquals(result9, 5.0, delta);
+		System.out.println(result0);
+		System.out.println(result3);
+		System.out.println(result6);
+		System.out.println(result9);
 	}
 	@Test
 	public void testValues2() throws IOException {
@@ -119,6 +123,22 @@ public class LeastSquaresTest {
 		assertEquals(result6, 2.87765, delta);
 		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
 		assertEquals(result9, 2.95744, delta);
+	}
+
+	@Test
+	public void testValues3() throws IOException {
+		double delta = 0.0001;
+		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("fL8ujZ89qTyhbjr1Qz5aSg");
+		
+		double result0 = myFunction.applyAsDouble(myDatabase, "1E2MQLWfwpsId185Fs2gWw"); //price is 1
+		assertEquals(result0, 5.00000, delta);
+		double result3 = myFunction.applyAsDouble(myDatabase, "loBOs5ruFXSNL-ZM29cTrA"); //price is 2
+		assertEquals(result3, 3.00000, delta);
+		double result6 = myFunction.applyAsDouble(myDatabase, "h_we4E3zofRTf4G0JTEF0A"); //price is 3
+		assertEquals(result6, 1.00000, delta);
+		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
+		assertEquals(result9, 1.00000, delta);
 	}
 	@Test
 	public void userThrowsExceptionTest1() throws IOException {
