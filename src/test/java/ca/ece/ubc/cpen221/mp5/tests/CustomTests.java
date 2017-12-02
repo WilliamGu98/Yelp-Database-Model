@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.gui.TreeViewer;
 import org.junit.Test;
 
@@ -13,7 +12,6 @@ import ca.ece.ubc.cpen221.mp5.*;
 import ca.ece.ubc.cpen221.parser.*;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.ToDoubleBiFunction;
 
@@ -24,10 +22,10 @@ import com.google.gson.*;
 
 public class CustomTests {
 
-    @Test
+    // @Test
     public void test() throws IOException {
         MP5Db<Restaurant> db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-        
+
         ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("QScfKdcxsa7t5qfE0Ev0Cw");
         System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
         System.out.println(func.applyAsDouble(db, "h_we4E3zofRTf4G0JTEF0A")); // Price is 3
@@ -35,13 +33,13 @@ public class CustomTests {
 
         // System.out.println(db.kMeansClusters_json(40xwxw));
     }
-    
-    //@Test
+
+    // @Test
     public void testPredictorFunc() throws IOException {
         MP5Db<Restaurant> db = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-        
+
         ToDoubleBiFunction<MP5Db<Restaurant>, String> func = db.getPredictorFunction("_NH7Cpq3qZkByP5xR4gXog");
-        
+
         System.out.println(func.applyAsDouble(db, "BJKIoQa5N2T_oDlLVf467Q")); // Price is 2
     }
 
@@ -59,9 +57,19 @@ public class CustomTests {
         System.out.println(serv.requestParser("ADDUSER {\"name\": \"Jim\"}"));
     }
 
-    // @Test
-    public void testANTLR() {
+    //@Test
+    public void querySearch() throws IOException {
+        YelpDBServer serv = new YelpDBServer(7777);
+        System.out.println(serv.requestParser(
+                "QUERY in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 3 || price >=4) && (rating>2)"));
+    }
 
+    @Test
+    public void testANTLR() {
+        
+        //https://stackoverflow.com/questions/30976962/nested-boolean-expression-parser-using-antlr
+
+        @SuppressWarnings("deprecation")
         CharStream stream = new ANTLRInputStream(
                 "in(Telegraph Ave) && (category(Chinese) || category(Italian)) && (price <= 2 || price >=4) && (rating>2)");
 
@@ -88,8 +96,8 @@ public class CustomTests {
         walker.walk(listener, tree);
 
         // VISUALIZATION//
-
         // show AST in GUI
+        
         JFrame frame = new JFrame("Antlr AST");
         JPanel panel = new JPanel();
         TreeViewer viewr = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
@@ -102,6 +110,7 @@ public class CustomTests {
         frame.setVisible(true);
         while (true)
             ;
+
     }
 
 }

@@ -54,6 +54,18 @@ public class QueryBaseListener implements QueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterComparator(QueryParser.ComparatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComparator(QueryParser.ComparatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAtom(QueryParser.AtomContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -66,73 +78,61 @@ public class QueryBaseListener implements QueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIneq(QueryParser.IneqContext ctx) { }
+	@Override public void enterInExpr(QueryParser.InExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIneq(QueryParser.IneqContext ctx) { }
+	@Override public void exitInExpr(QueryParser.InExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIn(QueryParser.InContext ctx) { }
+	@Override public void enterCategoryExpr(QueryParser.CategoryExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIn(QueryParser.InContext ctx) { }
+	@Override public void exitCategoryExpr(QueryParser.CategoryExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCategory(QueryParser.CategoryContext ctx) { }
+	@Override public void enterRatingExpr(QueryParser.RatingExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCategory(QueryParser.CategoryContext ctx) { }
+	@Override public void exitRatingExpr(QueryParser.RatingExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRating(QueryParser.RatingContext ctx) { }
+	@Override public void enterPriceExpr(QueryParser.PriceExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRating(QueryParser.RatingContext ctx) { }
+	@Override public void exitPriceExpr(QueryParser.PriceExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrice(QueryParser.PriceContext ctx) { }
+	@Override public void enterNameExpr(QueryParser.NameExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrice(QueryParser.PriceContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterName(QueryParser.NameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitName(QueryParser.NameContext ctx) { }
+	@Override public void exitNameExpr(QueryParser.NameExprContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
