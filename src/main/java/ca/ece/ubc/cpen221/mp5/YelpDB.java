@@ -756,14 +756,6 @@ public class YelpDB implements MP5Db<Restaurant> {
             this.y = longitude;
             this.weight = 1.0;
         }
-
-        public double getRestaurantClusterX() {
-            return this.x;
-        }
-
-        public double getRestaurantClusterY() {
-            return this.y;
-        }
     }
 
     /**
