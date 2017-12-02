@@ -7,8 +7,8 @@ public class Business implements DataEntry {
      * identify the business, such as its name, its latitude and longitude
      * coordinates, its full address, and a unique id.
      */
-
-    protected String name;
+	//Rep invariant
+    protected String name;		//not null
     protected double longitude; // Must be between -180 and 180
     protected double latitude; // Must be between -90 and 90
     protected String full_address; // Must be in the format of an address in the real world
