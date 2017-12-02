@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import com.google.gson.*;
 
+import ca.ece.ubc.cpen221.booleanexpressions.*;
 import ca.ece.ubc.cpen221.parser.QueryLexer;
 import ca.ece.ubc.cpen221.parser.QueryListener;
 import ca.ece.ubc.cpen221.parser.QueryParser;
@@ -115,25 +116,21 @@ public class YelpDB implements MP5Db<Restaurant> {
 		QueryParser parser = new QueryParser(tokens);
 		ParseTree tree = parser.root();
 		ParseTreeWalker walker = new ParseTreeWalker();
-		QueryListener listener = new QueryCreator();
-		walker.walk(listener, tree);
+		QueryCreator creator = new QueryCreator();		
+		
+		RestaurantHandle rH = new RestaurantHandle();
+		creator.setRestaurantHandle(rH);
+		
+		walker.walk(creator, tree);
 
-		// Expression booleanTree = listener.getExpression
-
-		// The listener should be able to construct a custom search query that we can
-		// retrieve
-		// using some method. Need to add the creation of this query to QueryCreator.
-
-		// This custom search query should be a recursive datatype that takes in a
-		// restaurant
-		// as its entrypoint, and then returns true/false.
-
-		Set<Restaurant> matches = new HashSet<Restaurant>();
-
+		Set<Restaurant> matches = new HashSet<Restaurant>();	
+		
 		// Look through every restaurant, if one matches query add it to the set
 		for (Restaurant r : this.restaurantMap.values()) {
-			// booleanTree.isMatching(r);
-
+			rH.setRestaurant(r);
+			if (creator.evaluateExpression()) {
+			    matches.add(r);
+			}
 		}
 
 		return matches;
