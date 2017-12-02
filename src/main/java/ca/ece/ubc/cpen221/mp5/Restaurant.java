@@ -1,7 +1,6 @@
 package ca.ece.ubc.cpen221.mp5;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class Restaurant extends Business {
 
@@ -20,10 +19,10 @@ public class Restaurant extends Business {
                                     // in
     protected String[] categories; // Category entries must be one of predetermined categories (i.e. chinese,
                                  // indian, etc.)
-    protected String state; // Must be one of the 50 states in the US, in abbrev. format
-    protected String type; // Must be a business
-    protected double stars; // Must be a double between 1 and 5 inclusive, with only 0.5 increments
-    protected String city; // Must be a valid city in the restaurant's state
+    protected String state; // Must be one of the 50 states in the US, in abbrev. format or empty
+    protected String type; // Must be a "business"
+    protected double stars; // Must be a double between 1 and 5 inclusive
+    protected String city; // Must be a valid city in the restaurant's state or empty
     protected int review_count; // The number of reviews for the restaurant, and should match the number of
                               // review data entries in the same database
     protected String[] schools;
@@ -77,12 +76,32 @@ public class Restaurant extends Business {
         return this.price;
     }
     
+    public void updateWithNewReview(Review r) {
+        double new_stars = (stars * review_count + r.getStars())/(review_count + 1);
+        this.review_count++;
+        this.stars = new_stars;
+    }
+    
     public void generateNewRestaurantInfo(YelpDB db) {
         this.type = "business";
-        //Other stuff here
-        
-        
+        this.open = true;
+        if (this.neighborhoods == null) {
+            this.neighborhoods = new String[] {};
+        }
+        if (this.categories == null) {
+            this.categories = new String[] {};
+        }
+        if (this.state == null) {
+            this.state = "";
+        }
+        if (this.city == null) {
+            this.city = "";
+        }
+        if (this.schools == null) {
+            this.schools = new String[] {};
+        }
         this.business_id = db.generateRestaurantID();
         this.url = "http://www.yelp.com/restaurant_details?businessid=" + this.business_id;
+        this.photo_url = "http://www.yelp.com/restaurant_photos?businessid=" + this.business_id;
     }
 }

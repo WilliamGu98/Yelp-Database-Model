@@ -5,8 +5,20 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.ToDoubleBiFunction;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
 import com.google.gson.*;
 
+import ca.ece.ubc.cpen221.parser.QueryLexer;
+import ca.ece.ubc.cpen221.parser.QueryListener;
+import ca.ece.ubc.cpen221.parser.QueryParser;
+
+@SuppressWarnings("deprecation")
 public class YelpDB implements MP5Db<Restaurant> {
 
     /**
@@ -15,13 +27,14 @@ public class YelpDB implements MP5Db<Restaurant> {
      * supports several operations
      */
 
+    /* Rep Invariants */
     private ConcurrentMap<String, Restaurant> restaurantMap; // Maps a Business_id -> Restaurant. The business id should
                                                              // match that of the restaurant
     private ConcurrentMap<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of
                                                      // the review
     private ConcurrentMap<String, YelpUser> userMap; // Maps a User_id -> YelpUser. The yelp user id should match that
                                                      // of the user id
-    Gson gson; // For JSON parsing
+    private Gson gson; // For JSON parsing
 
     /**
      * Constructor for a yelp database
@@ -116,13 +129,38 @@ public class YelpDB implements MP5Db<Restaurant> {
     @Override
     public Set<Restaurant> getMatches(String queryString) {
         // TODO Auto-generated method stub
-        return null;
+
+        /* Setup grammar listener */
+        CharStream stream = new ANTLRInputStream(queryString);
+        QueryLexer lexer = new QueryLexer(stream);
+        TokenStream tokens = new CommonTokenStream(lexer);
+        QueryParser parser = new QueryParser(tokens);
+        ParseTree tree = parser.root();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        QueryListener listener = new QueryCreator();
+        walker.walk(listener, tree);
+
+        // The listener should be able to construct a custom search query that we can
+        // retrieve
+        // using some method. Need to add the creation of this query to QueryCreator.
+
+        // This custom search query should be a recursive datatype that takes in a
+        // restaurant
+        // as its entrypoint, and then returns true/false.
+
+        Set<Restaurant> matches = new HashSet<Restaurant>();
+
+        // Look through every restaurant, if one matches query add it to the set
+        for (Restaurant r : this.restaurantMap.values()) {
+
+        }
+
+        return matches;
     }
 
     /**
      * Cluster objects into k clusters using k-means clustering. The resulting
-     * clusters are restaurants identified by their business ID. If k = 0, then no
-     * clusters are created
+     * clusters are restaurants identified by their business ID.
      * 
      * @param k
      *            number of clusters to create (0 < k <= number of objects)
@@ -143,38 +181,59 @@ public class YelpDB implements MP5Db<Restaurant> {
         // restaurants (in id form)
         Map<double[], Set<String>> restaurantClusters = this.initiateClusters(k, this.restaurantMap.keySet());
 
-        // Flag is true if any restaurants are reassigned to a new centroid
-        // If no restaurants are reassigned, then we are done
-        boolean flag;
-        do {
-            this.reassignCentroids(restaurantClusters);
-            flag = reassignRestaurants(restaurantClusters, this.restaurantMap.keySet());
-        } while (flag);
+        // DO WHILE LOOP HERE, WHILE THERE ARE NO EMPTY CLUSTERS
 
-        // Add final restaurant clusters to list
+        do {
+            Set<String> emptyCluster = findEmptyCluster(restaurantClusters);
+            Set<String> largestCluster = findLargestCluster(restaurantClusters);
+
+            // Code below finds some random centroid within the largest cluster
+            double minLat = Double.MAX_VALUE;
+            double minLon = Double.MAX_VALUE;
+            double maxLat = -Double.MAX_VALUE;
+            double maxLon = -Double.MAX_VALUE;
+            for (String rID : largestCluster) {
+                double lat = this.getRestaurant(rID).getLatitude();
+                double lon = this.getRestaurant(rID).getLongitude();
+                if (lat < minLat) {
+                    minLat = lat;
+                }
+                if (lat > maxLat) {
+                    maxLat = lat;
+                }
+                if (lon < minLon) {
+                    minLon = lon;
+                }
+                if (lon > maxLon) {
+                    maxLon = lon;
+                }
+            }
+            double[] centroidInLargestCluster = this.generateRandomCentroid(minLat, maxLat, minLon, maxLon);
+
+            // Find the empty cluster and reassign its centroid by placing it somewhere in
+            // the largest cluster
+            for (double[] centroid : restaurantClusters.keySet()) {
+                if (restaurantClusters.get(centroid).equals(emptyCluster)) {
+                    centroid[0] = centroidInLargestCluster[0]; // New longitude based on largest cluster
+                    centroid[1] = centroidInLargestCluster[1]; // New latitude based on largest cluster
+                    break; // Once we find the empty cluster, we are done
+                }
+            }
+
+            // Flag is true if any restaurants are reassigned to a new centroid
+            // If no restaurants are reassigned, then we are done one run through
+            boolean flag;
+            do {
+                this.reassignCentroids(restaurantClusters);
+                flag = reassignRestaurants(restaurantClusters, this.restaurantMap.keySet());
+            } while (flag);
+
+        } while (atLeastOneEmptyCluster(restaurantClusters)); // Repeat if any empty clusters are detected
+
+        // Add final restaurant clusters to list of clusters
         for (Set<String> cluster : restaurantClusters.values()) {
             kMeansClusters.add(cluster);
         }
-
-        // Get rid of empty clusters by splitting large clusters
-        while (atLeastOneEmptyCluster(kMeansClusters)) {
-            // Find one empty set and remove it from the list of clusters
-            Set<String> emptyCluster = findEmptyCluster(kMeansClusters);
-            kMeansClusters.remove(emptyCluster);
-
-            // Find largest set and remove it from the list of clusters
-            Set<String> largestCluster = findLargestCluster(kMeansClusters);
-            kMeansClusters.remove(largestCluster);
-
-            // Attempt to split largest cluster (Use the first two restaurants as centers)
-            Map<double[], Set<String>> splitClusters = splitCluster(largestCluster);
-
-            // Add final split clusters back into original list
-            for (Set<String> newSplitCluster : splitClusters.values()) {
-                kMeansClusters.add(newSplitCluster);
-            }
-        }
-
         return this.clusterToJSON(kMeansClusters);
     }
 
@@ -224,7 +283,14 @@ public class YelpDB implements MP5Db<Restaurant> {
         ToDoubleBiFunction<MP5Db<Restaurant>, String> function = (database, restaurantID) -> {
             // Function logic
             double price = ((YelpDB) database).getRestaurant(restaurantID).getPrice();
-            return a + b * price;
+            double ratingPrediction = a + b * price;
+            if (ratingPrediction > 5) {
+                return 5;
+            } else if (ratingPrediction < 1) {
+                return 1;
+            } else {
+                return ratingPrediction;
+            }
         };
 
         return function;
@@ -239,16 +305,15 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @return returns a string in JSON format of the restaurant info
      */
     public String getRestaurantJSON(String rID) {
-
         return gson.toJson(this.restaurantMap.get(rID));
     }
 
     /**
-     * Adds a new user to the database given user info in json format
+     * Attempts to add a new user to the database given user info in json format
      * 
      * @param jsonInfo
      *            string in json format that represents new user
-     * @modifies this database by adding a new user
+     * @modifies this database by adding a new user if the new user info is valid
      * @return the json format info of the newly added user
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if the name field is null
@@ -265,11 +330,13 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Adds a new restaurant to the database given restaurant info in json format
+     * Attempts to add a new restaurant to the database given restaurant info in
+     * json format
      * 
      * @param jsonInfo
      *            string in json format that represents new user
-     * @modifies this database by adding a new restaurant
+     * @modifies this database by adding a new restaurant if the new restaurant info
+     *           is valid
      * @return the json format info of the newly added restaurant
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if any required fields for
@@ -278,8 +345,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
         // Check if any required fields are null
-        if (rest.getCity() == null || rest.getState() == null || rest.getName() == null
-                || rest.getFullAddress() == null) {
+        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1 || rest.getFullAddress() == null) {
             throw new JsonSyntaxException(jsonInfo);
         }
         rest.generateNewRestaurantInfo(this);
@@ -288,10 +354,17 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Adds a new review
+     * Attempts to add a new review to the database given review info in json format
      * 
      * @param jsonInfo
-     * @return
+     *            string in json format that represents new review
+     * @modifies this database by adding a new review if review is valid
+     * @return the json format info of the newly added review if valid. If the
+     *         review refers to a restaurant or user that does not exist in this
+     *         database, return a corresponding error message
+     * @throws JsonSyntaxException
+     *             if jsonInfo is not in proper json format or if any required
+     *             fields for review are null
      */
     public String addReviewJSON(String jsonInfo) throws JsonSyntaxException {
         Review review = gson.fromJson(jsonInfo, Review.class);
@@ -299,7 +372,7 @@ public class YelpDB implements MP5Db<Restaurant> {
         // If any required fields are null, throw a JsonSyntaxException (Invalid review
         // format)
         if (review.getText() == null || review.getUserId() == null || review.getBusinessId() == null
-                || review.getStars() == 0) {
+                || review.getStars() > 5 || review.getStars() < 1) {
             throw new JsonSyntaxException(jsonInfo);
         }
         // We confirm if the review actually has a valid user id and restaurant id
@@ -311,14 +384,41 @@ public class YelpDB implements MP5Db<Restaurant> {
         }
         // Valid json review with valid restaurant and user references
         else {
-            review.generateNewReviewInfo(this);
-            this.reviewMap.put(review.getID(), review);
+            review.generateNewReviewInfo(this); // Generate new review info
+            this.reviewMap.put(review.getID(), review); // Add the review to our review map
+            this.userMap.get(review.getUserId()).updateWithNewReview(review); // Update user info with new review info
+            this.restaurantMap.get(review.getBusinessId()).updateWithNewReview(review); // Update restaurant info with
+                                                                                        // new review info
             return gson.toJson(review);
         }
     }
 
+    /**
+     * Performs a query search of restaurants on this database, based on parameters
+     * specified in query
+     * 
+     * @param query
+     *            a string that represents the characteristics of restaurant(s) we
+     *            want to look for. For querySearch to be successful, the query
+     *            string should be in proper grammatical format. One example of a
+     *            properly formatted string is: in(Telegraph Ave) &&
+     *            (category(Chinese) || category(Italian)) && price <= 2
+     * @return a string that represents the json info of any matching restaurants
+     *         specified by the query, or an error message if the query string is
+     *         invalid or no matching restaurants are found
+     */
     public String querySearch(String query) {
-        return null;
+        Set<Restaurant> matching;
+        try {
+            matching = getMatches(query);
+        } catch (IllegalArgumentException e) {
+            return "ERR: INVALID_QUERY";
+        }
+        if (matching.isEmpty()) {
+            return "ERR: NO_MATCH";
+        } else {
+            return gson.toJson(matching);
+        }
     }
 
     /** HELPER METHODS **/
@@ -574,8 +674,8 @@ public class YelpDB implements MP5Db<Restaurant> {
         }
     }
 
-    private boolean atLeastOneEmptyCluster(List<Set<String>> kMeansClusters) {
-        for (Set<String> cluster : kMeansClusters) {
+    private boolean atLeastOneEmptyCluster(Map<double[], Set<String>> restaurantClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.isEmpty()) {
                 return true;
             }
@@ -584,13 +684,13 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Finds an empty set, if none exist return null
+     * Finds an empty cluster, if none exist return null
      * 
      * @param kMeansClusters
      * @return
      */
-    private Set<String> findEmptyCluster(List<Set<String>> kMeansClusters) {
-        for (Set<String> cluster : kMeansClusters) {
+    private Set<String> findEmptyCluster(Map<double[], Set<String>> restaurantClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.isEmpty()) {
                 return cluster;
             }
@@ -598,61 +698,22 @@ public class YelpDB implements MP5Db<Restaurant> {
         return null;
     }
 
-    private Set<String> findLargestCluster(List<Set<String>> kMeansClusters) {
+    /**
+     * Finds the largest cluster
+     * 
+     * @param kMeansClusters
+     * @return
+     */
+    private Set<String> findLargestCluster(Map<double[], Set<String>> restaurantClusters) {
         int maxSize = 0;
         Set<String> largestCluster = null;
-        for (Set<String> cluster : kMeansClusters) {
+        for (Set<String> cluster : restaurantClusters.values()) {
             if (cluster.size() > maxSize) {
                 largestCluster = cluster;
                 maxSize = cluster.size();
             }
         }
         return largestCluster;
-    }
-
-    private Map<double[], Set<String>> splitCluster(Set<String> clusterToSplit) {
-        // Find the min and max latitudes and longitudes
-        double minLat = Double.MAX_VALUE;
-        double minLon = Double.MAX_VALUE;
-        double maxLat = -Double.MAX_VALUE;
-        double maxLon = -Double.MAX_VALUE;
-
-        for (String rID : clusterToSplit) {
-            double lat = this.getRestaurant(rID).getLatitude();
-            double lon = this.getRestaurant(rID).getLongitude();
-            if (lat < minLat) {
-                minLat = lat;
-            }
-            if (lat > maxLat) {
-                maxLat = lat;
-            }
-            if (lon < minLon) {
-                minLon = lon;
-            }
-            if (lon > maxLon) {
-                maxLon = lon;
-            }
-        }
-        double[] centroid1 = new double[] { minLat, minLon };
-        double[] centroid2 = new double[] { maxLat, maxLon };
-
-        Map<double[], Set<String>> splitClusters = new HashMap<double[], Set<String>>();
-        splitClusters.put(centroid1, new HashSet<String>());
-        splitClusters.put(centroid2, new HashSet<String>());
-
-        for (String rID : clusterToSplit) {
-            double dist1 = computeDistance(centroid1, this.getRestaurant(rID));
-            double dist2 = computeDistance(centroid2, this.getRestaurant(rID));
-
-            if (dist1 <= dist2) {
-                splitClusters.get(centroid1).add(rID);
-            } else {
-                splitClusters.get(centroid2).add(rID);
-            }
-
-        }
-
-        return splitClusters;
     }
 
     /**
@@ -673,7 +734,7 @@ public class YelpDB implements MP5Db<Restaurant> {
                 formattedClusters.add(cluster);
             }
         }
-        
+
         return gson.toJson(formattedClusters);
     }
 
@@ -695,17 +756,18 @@ public class YelpDB implements MP5Db<Restaurant> {
             this.y = longitude;
             this.weight = 1.0;
         }
-        
+
         public double getRestaurantClusterX() {
-        	return this.x;
+            return this.x;
         }
+
         public double getRestaurantClusterY() {
-        	return this.y;
+            return this.y;
         }
     }
 
     /**
-     * Generates a new user ID
+     * Generates a new user ID that does not yet exist in the database
      * 
      * @return the new user id
      */
@@ -720,7 +782,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Generates a new restaurant ID
+     * Generates a new restaurant ID that does not yet exist in the database
      * 
      * @return the new restaurant id
      */
@@ -734,6 +796,11 @@ public class YelpDB implements MP5Db<Restaurant> {
         return restID;
     }
 
+    /**
+     * Generates a new review ID that does not yet exist in the database
+     * 
+     * @return the new restaurant id
+     */
     protected String generateReviewID() {
         Random r = new Random();
         String restID;

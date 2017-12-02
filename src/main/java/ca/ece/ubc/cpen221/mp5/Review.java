@@ -40,7 +40,12 @@ public class Review implements DataEntry {
     public void generateNewReviewInfo(YelpDB db) {
         this.type = "review";
         this.date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        
+        if (this.votes == null) {
+            this.votes = new HashMap<String, Integer>();
+            this.votes.put("cool", 0);
+            this.votes.put("useful", 0);
+            this.votes.put("funny", 0);
+        }
         this.review_id = db.generateReviewID();
     }
 
