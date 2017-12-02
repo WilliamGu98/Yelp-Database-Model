@@ -98,28 +98,6 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Lookup a specific review given its ID
-     * 
-     * @param rID
-     *            the ID of the review to lookup
-     * @return the review that matches rID
-     */
-    public Review getReview(String rID) {
-        return this.reviewMap.get(rID);
-    }
-
-    /**
-     * Lookup a specific yelp user given its ID
-     * 
-     * @param uID
-     *            the ID of the user to lookup
-     * @return the yelp user that matches uID
-     */
-    public YelpUser getYelpUser(String uID) {
-        return this.userMap.get(uID);
-    }
-
-    /**
      * Perform a structured query and return the set of objects that matches the
      * query
      * 
@@ -139,6 +117,8 @@ public class YelpDB implements MP5Db<Restaurant> {
         ParseTreeWalker walker = new ParseTreeWalker();
         QueryListener listener = new QueryCreator();
         walker.walk(listener, tree);
+        
+        //Expression booleanTree = listener.getExpression
 
         // The listener should be able to construct a custom search query that we can
         // retrieve
@@ -152,7 +132,8 @@ public class YelpDB implements MP5Db<Restaurant> {
 
         // Look through every restaurant, if one matches query add it to the set
         for (Restaurant r : this.restaurantMap.values()) {
-
+            //booleanTree.isMatching(r);
+            
         }
 
         return matches;
@@ -246,10 +227,11 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @throws illegal
      *             argument exception if there is insufficient data in the database
      *             to create a valid predictor function
-     * @return a function that predicts the user's ratings for objects (of type T)
-     *         in the database of type MP5Db<T>. The function that is returned takes
-     *         two arguments: one is the database and other other is a String that
-     *         represents the id of an object of type T. If there is insufficient
+     * @return a function that predicts the user's ratings for objects (of type
+     *         Restaurant) in the database of type MP5Db<Restaurant>. The function
+     *         that is returned takes two arguments: one is the database and other
+     *         other is a String that represents the id of an object of type
+     *         Restaurant that exists in the database. If there is insufficient
      *         quantities of data in the database to create a predictor function, an
      *         illegal argument exception is thrown.
      */
