@@ -46,6 +46,10 @@ public class LeastSquaresTest {
 		assertEquals(result9, result10, delta);
 		assertEquals(result10, result11, delta);
 		assertEquals(result11, result9, delta);
+		System.out.println(result0);
+		System.out.println(result3);
+		System.out.println(result6);
+		System.out.println(result9);
 	}
 	
 	@Test
@@ -67,7 +71,7 @@ public class LeastSquaresTest {
 		assertEquals(result3, result4, delta);
 		assertEquals(result4, result5, delta);
 		assertEquals(result5, result3, delta);
-		
+	
 		double result6 = myFunction.applyAsDouble(myDatabase, "h_we4E3zofRTf4G0JTEF0A"); //price is 3
 		double result7 = myFunction.applyAsDouble(myDatabase, "bDfcpkyVlSQUvA57HjDTKQ"); //price is 3
 		double result8 = myFunction.applyAsDouble(myDatabase, "g5S6Q9W0IwN5AEK3fNWzbw"); //price is 3
@@ -81,8 +85,41 @@ public class LeastSquaresTest {
 		assertEquals(result9, result10, delta);
 		assertEquals(result10, result11, delta);
 		assertEquals(result11, result9, delta);
+		System.out.println(result0);
+		System.out.println(result3);
+		System.out.println(result6);
+		System.out.println(result9);
 	}
-	
+	@Test
+	public void testValues1() throws IOException {
+		double delta = 0.0001;
+		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("fL8ujZ89qTyhbjr1Qz5aSg");
+		
+		double result0 = myFunction.applyAsDouble(myDatabase, "1E2MQLWfwpsId185Fs2gWw"); //price is 1
+		assertEquals(result0, 5.0000, delta);
+		double result3 = myFunction.applyAsDouble(myDatabase, "loBOs5ruFXSNL-ZM29cTrA"); //price is 2
+		assertEquals(result3, 3.0000, delta);
+		double result6 = myFunction.applyAsDouble(myDatabase, "h_we4E3zofRTf4G0JTEF0A"); //price is 3
+		assertEquals(result6, 1.0000, delta);
+		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
+		assertEquals(result9, 1.0000, delta);
+	}
+	@Test
+	public void testValues2() throws IOException {
+		double delta = 0.0001;
+		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+		ToDoubleBiFunction myFunction = myDatabase.getPredictorFunction("Rto4xWr5gXA2IbrfyAn-Xg");
+		
+		double result0 = myFunction.applyAsDouble(myDatabase, "1E2MQLWfwpsId185Fs2gWw"); //price is 1
+		assertEquals(result0, 2.71808, delta);
+		double result3 = myFunction.applyAsDouble(myDatabase, "loBOs5ruFXSNL-ZM29cTrA"); //price is 2
+		assertEquals(result3, 2.79787, delta);
+		double result6 = myFunction.applyAsDouble(myDatabase, "h_we4E3zofRTf4G0JTEF0A"); //price is 3
+		assertEquals(result6, 2.87765, delta);
+		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
+		assertEquals(result9, 2.95744, delta);
+	}
 	@Test
 	public void userThrowsExceptionTest1() throws IOException {
 		double delta = 0.0001;
