@@ -133,14 +133,13 @@ public class KMeansClusterTest {
 
 			assertEquals(thisDistance, shortestDistance, 0.0000000001);
 		}
-		// System.out.println(myDatabase.kMeansClusters_json(5));
 	}
 	
 	@Test
 	public void test2() throws IOException {
 
 		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
-		int k = 10;
+		int k = 3;
 
 
 		String s1 = myDatabase.kMeansClusters_json(k);
@@ -173,6 +172,43 @@ public class KMeansClusterTest {
 
 			assertEquals(thisDistance, shortestDistance, 0.0000000001);
 		}
-		// System.out.println(myDatabase.kMeansClusters_json(5));
 	}
+	@Test
+	public void test3() throws IOException {
+
+		YelpDB myDatabase = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
+
+		int k = 35;
+		String s1 = myDatabase.kMeansClusters_json(k);
+		List<double[]> centroidList = new ArrayList<double[]>();
+
+		Gson gson = new Gson();
+		clusterClass[] clusters = gson.fromJson(s1, clusterClass[].class);
+		List<clusterClass> specificClusterList = new ArrayList<clusterClass>();
+
+		double shortestDistance;
+
+		for (int i = 0; i < k; i++) {	//find all centroids. put them in a list
+			specificClusterList = clusterClass.getRestaurantsInCluster(clusters, i);
+			double[] centroid = clusterClass.findCentroid(specificClusterList);
+			centroidList.add(centroid);
+		}
+		for (clusterClass restaurant : clusters) { // for EVERY restaurant
+			shortestDistance = Double.MAX_VALUE;
+
+			for (int i = 0; i < k; i++) { // retrieve the shortest distance from restaurant to cluster
+				double distance = restaurant.findDistanceToCentroid(centroidList.get(i));
+				if (distance < shortestDistance) {
+					shortestDistance = distance;
+				}
+			}
+			// find the distance to it's own centroid
+			int thisCluster = restaurant.getCluster();
+			double[] thisCentroid = centroidList.get(thisCluster);
+			double thisDistance = restaurant.findDistanceToCentroid(thisCentroid);
+
+			assertEquals(thisDistance, shortestDistance, 0.0000000001);
+		}
+	}
+	
 }
