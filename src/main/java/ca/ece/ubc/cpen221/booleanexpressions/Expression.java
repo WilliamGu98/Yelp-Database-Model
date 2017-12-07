@@ -1,9 +1,5 @@
 package ca.ece.ubc.cpen221.booleanexpressions;
 
-/**
- * Expression - An arithmetic expression.
- *
- */
 public interface Expression {
         
     /**

@@ -14,7 +14,7 @@ import ca.ece.ubc.cpen221.operators.*;
 
 public class QueryCreator extends QueryBaseListener {
 
-    private RestaurantHandle r; // Allows us to switch between restaurants to be tested by the booleanExp.
+    private RestaurantHandle rH; // Allows us to switch between restaurants to be tested by the booleanExp.
 
     // This stack helps us construct the boolean tree expression. Every time we exit
     // a terminal boolean expression,
@@ -29,29 +29,33 @@ public class QueryCreator extends QueryBaseListener {
     private Expression booleanExp;
 
     /**
-     * Evaluates the booleanExp tree for the restaurant that the handler contains at
-     * the time of execution
+     * Get the booleanExp tree for given the search query that this walker walks
+     * through
      * 
-     * @return true if the restaurant from the handler matches the query and false
-     *         if it does not
+     * @return the boolean expression tree
      */
-    public boolean evaluateExpression() {
-        return booleanExp.eval();
+    public Expression getExpression() {
+        return this.booleanExp;
     }
 
     /**
-     * Sets up the restaurant handle for the given booleanExp tree. This handle
-     * supports methods that allow different restaurants to be set, allowing the
-     * booleanExp to be able to quickly re-evaluate different restaurants. Note that
-     * this handle should be set before the query creator walks through a given
-     * query string.
+     * Get the restaurant handle for the given search query that this walker walks
+     * though
      * 
-     * @param r
-     *            the restaurant handle that one has access to, allowing one to test
-     *            the booleanExp tree for different restaurants
+     * @return the restaurant handle
      */
-    public void setRestaurantHandle(RestaurantHandle r) {
-        this.r = r;
+    public RestaurantHandle getHandle() {
+        return this.rH;
+    }
+
+    /**
+     * When the root expression context is entered, the restaurant handle is
+     * initialized. This handle supports methods that allow different restaurants to
+     * be set, allowing the booleanExp to be able to quickly re-evaluate different
+     * restaurants.
+     */
+    public void enterRoot(RootContext ctx) {
+        this.rH = new RestaurantHandle();
     }
 
     /**
@@ -121,7 +125,7 @@ public class QueryCreator extends QueryBaseListener {
         TerminalNode token = ctx.STRING();
         String category = token.getText();
 
-        CategoryExpression exp = new CategoryExpression(r, category);
+        CategoryExpression exp = new CategoryExpression(rH, category);
         expressionStack.push(exp);
     }
 
@@ -134,7 +138,7 @@ public class QueryCreator extends QueryBaseListener {
         TerminalNode token = ctx.STRING();
         String location = token.getText();
 
-        InExpression exp = new InExpression(r, location);
+        InExpression exp = new InExpression(rH, location);
         expressionStack.push(exp);
     }
 
@@ -147,7 +151,7 @@ public class QueryCreator extends QueryBaseListener {
         TerminalNode token = ctx.STRING();
         String name = token.getText();
 
-        NameExpression exp = new NameExpression(r, name);
+        NameExpression exp = new NameExpression(rH, name);
         expressionStack.push(exp);
     }
 
@@ -164,7 +168,7 @@ public class QueryCreator extends QueryBaseListener {
         String compText = compToken.getText();
         double rating = Integer.parseInt(numText);
 
-        RatingExpression exp = new RatingExpression(r, rating, compText);
+        RatingExpression exp = new RatingExpression(rH, rating, compText);
         expressionStack.push(exp);
     }
 
@@ -181,7 +185,7 @@ public class QueryCreator extends QueryBaseListener {
         String compText = compToken.getText();
         double price = Integer.parseInt(numText);
 
-        PriceExpression exp = new PriceExpression(r, price, compText);
+        PriceExpression exp = new PriceExpression(rH, price, compText);
         expressionStack.push(exp);
     }
 

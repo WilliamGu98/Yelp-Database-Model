@@ -27,7 +27,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      * supports several operations
      */
 
-    /* Rep Invariants */
+    /** Rep Invariants **/
     private ConcurrentMap<String, Restaurant> restaurantMap; // Maps a Business_id -> Restaurant. The business id should
                                                              // match that of the restaurant
     private ConcurrentMap<String, Review> reviewMap; // Maps a Review_id -> Review. The review id should match that of
@@ -117,20 +117,16 @@ public class YelpDB implements MP5Db<Restaurant> {
 
         // Setup custom walker
         QueryCreator creator = new QueryCreator();
-
-        // Restaurant handle allows us to switch the restaurant to be tested in the
-        // boolean tree expression whenever we want
-        RestaurantHandle rH = new RestaurantHandle();
-        creator.setRestaurantHandle(rH);
-
         walker.walk(creator, tree);
 
         Set<Restaurant> matches = new HashSet<Restaurant>();
+        RestaurantHandle rH = creator.getHandle();
+        Expression expTree = creator.getExpression();
 
         // Look through every restaurant, if one matches query add it to the set
         for (Restaurant r : this.restaurantMap.values()) {
             rH.setRestaurant(r);
-            if (creator.evaluateExpression()) {
+            if (expTree.eval()) {
                 matches.add(r);
             }
         }

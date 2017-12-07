@@ -22,7 +22,7 @@ public class YelpDBServer {
      * clients that connect the server
      */
 
-    /* Rep invariant */
+    /** Rep invariant **/
     private ServerSocket serverSocket; // serverSocket != null
     private YelpDB yelpDB; // Wraps a non-null yelp database
 
