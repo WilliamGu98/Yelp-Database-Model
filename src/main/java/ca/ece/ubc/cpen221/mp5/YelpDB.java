@@ -87,14 +87,15 @@ public class YelpDB implements MP5Db<Restaurant> {
     }
 
     /**
-     * Lookup a specific restaurant given its ID
+     * Lookup a specific restaurant price given its ID
      * 
      * @param rID
      *            the ID of the restaurant to lookup
-     * @return the restaurant that matches rID
+     * @return the price of the matching restaurant
      */
-    public Restaurant getRestaurant(String rID) {
-        return this.restaurantMap.get(rID);
+
+    public int getRestaurantPrice(String rID) {
+        return this.restaurantMap.get(rID).getPrice();
     }
 
     /**
@@ -167,8 +168,8 @@ public class YelpDB implements MP5Db<Restaurant> {
             double maxLat = -Double.MAX_VALUE;
             double maxLon = -Double.MAX_VALUE;
             for (String rID : largestCluster) {
-                double lat = this.getRestaurant(rID).getLatitude();
-                double lon = this.getRestaurant(rID).getLongitude();
+                double lat = this.restaurantMap.get(rID).getLatitude();
+                double lon = this.restaurantMap.get(rID).getLongitude();
                 if (lat < minLat) {
                     minLat = lat;
                 }
@@ -257,7 +258,7 @@ public class YelpDB implements MP5Db<Restaurant> {
 
         ToDoubleBiFunction<MP5Db<Restaurant>, String> function = (database, restaurantID) -> {
             // Function logic
-            double price = ((YelpDB) database).getRestaurant(restaurantID).getPrice();
+            double price = ((YelpDB) database).getRestaurantPrice(restaurantID);
             double ratingPrediction = a + b * price;
             if (ratingPrediction > 5) {
                 return 5;
@@ -277,10 +278,50 @@ public class YelpDB implements MP5Db<Restaurant> {
      * Retrieves the JSON representation of a given restaurant, found by its ID
      * 
      * @param rID
+     *            ID of restaurant to return
      * @return returns a string in JSON format of the restaurant info
      */
     public String getRestaurantJSON(String rID) {
-        return gson.toJson(this.restaurantMap.get(rID));
+        Restaurant r = this.restaurantMap.get(rID);
+        if (r == null) {
+            return "ERR: NO_SUCH_RESTAURANT";
+        } else {
+            return gson.toJson(r);
+        }
+    }
+
+    /**
+     * Retrieves the JSON representation of a given user, found by its ID (Only used
+     * for server testing)
+     * 
+     * @param uID
+     *            ID of user to return
+     * @return returns a string in JSON format of the user info
+     */
+    public String getUserJSON(String uID) {
+        YelpUser u = this.userMap.get(uID);
+        if (u == null) {
+            return "ERR: NO_SUCH_USER";
+        } else {
+            return gson.toJson(u);
+        }
+    }
+
+    /**
+     * Retrieves the JSON representation of a given review, found by its ID (Only
+     * used for server testing)
+     * 
+     * @param rID
+     *            ID of review to return
+     * @return returns a string in JSON format of the review info
+     */
+    public String getReviewJSON(String rID) {
+        Review r = this.reviewMap.get(rID);
+        if (r == null) {
+            return "ERR: NO_SUCH_REVIEW";
+        } else {
+            return gson.toJson(r);
+        }
     }
 
     /**
@@ -528,8 +569,8 @@ public class YelpDB implements MP5Db<Restaurant> {
         double maxLon = -Double.MAX_VALUE;
 
         for (String rID : restaurantIDs) {
-            double lat = this.getRestaurant(rID).getLatitude();
-            double lon = this.getRestaurant(rID).getLongitude();
+            double lat = this.restaurantMap.get(rID).getLatitude();
+            double lon = this.restaurantMap.get(rID).getLongitude();
             if (lat < minLat) {
                 minLat = lat;
             }
@@ -560,7 +601,7 @@ public class YelpDB implements MP5Db<Restaurant> {
             double minDist = Double.MAX_VALUE;
 
             for (double[] centroid : restaurantClusters.keySet()) {
-                double distance = this.computeDistance(centroid, this.getRestaurant(rID));
+                double distance = this.computeDistance(centroid, this.restaurantMap.get(rID));
                 if (distance < minDist) {
                     newCentroid = centroid;
                     minDist = distance;
@@ -588,7 +629,7 @@ public class YelpDB implements MP5Db<Restaurant> {
         boolean flag = false;
 
         for (String rID : restaurantIDs) {
-            Restaurant r = this.getRestaurant(rID);
+            Restaurant r = this.restaurantMap.get(rID);
 
             double[] oldCentroid = null;
             double[] newCentroid = null;
@@ -637,7 +678,7 @@ public class YelpDB implements MP5Db<Restaurant> {
             int size = restaurantClusters.get(centroid).size();
 
             for (String rID : restaurantClusters.get(centroid)) {
-                Restaurant r = this.getRestaurant(rID);
+                Restaurant r = this.restaurantMap.get(rID);
                 // Get the total value for lattitude and longitude for all restaurants
                 // in the cluster
                 totalLat += r.getLatitude();
