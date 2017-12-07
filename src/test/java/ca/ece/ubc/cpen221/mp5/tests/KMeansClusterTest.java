@@ -9,7 +9,6 @@ import com.google.gson.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.ToDoubleBiFunction;
 
 public class KMeansClusterTest {
 
