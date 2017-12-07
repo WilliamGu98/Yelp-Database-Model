@@ -4,8 +4,8 @@ import java.io.*;
 import java.net.Socket;
 
 /**
- * FibonacciClient is a client that sends requests to the FibonacciServer and
- * interprets its replies. A new FibonacciClient is "open" until the close()
+ * YelpDBClient is a client that sends requests to the YelpDBServer and
+ * interprets its replies. A new YelpDBClient is "open" until the close()
  * method is called, at which point it is "closed" and may not be used further.
  */
 public class YelpDBClient {
@@ -15,7 +15,7 @@ public class YelpDBClient {
     // Rep invariant: socket, in, out != null
 
     /**
-     * Make a FibonacciClient and connect it to a server running on hostname at the
+     * Make a YelpDBClient and connect it to a server running on hostname at the
      * specified port.
      * 
      * @throws IOException
@@ -31,7 +31,7 @@ public class YelpDBClient {
      * Send a request to the server. Requires this is "open".
      * 
      * @param x
-     *            to find Fibonacci(x)
+     *            one of certain requests
      * @throws IOException
      *             if network or server failure
      */
@@ -44,7 +44,7 @@ public class YelpDBClient {
      * Get a reply from the next request that was submitted. Requires this is
      * "open".
      * 
-     * @return the requested Fibonacci number
+     * @return the response from the server
      * @throws IOException
      *             if network or server failure
      */
@@ -70,42 +70,15 @@ public class YelpDBClient {
     }
 
     /**
-     * Use a FibonacciServer to find the first N Fibonacci numbers.
+     * Start a YelpDB Client
      */
     public static void main(String[] args) {
         try {
             int portNum = Integer.parseInt(args[0]);
             YelpDBClient client = new YelpDBClient("localhost", portNum);
-
-            String request1 = "GETRESTAURANT h_we4E3zofRTf4G0JTEF0A";
-            String request2 = "ADDUSER {\"name\": \"Jim\"}";
-            String request3 = "ADDRESTAURANT {\"name\": \"Bob's burgers\"}"; // Expect an error b/c no address
-            String request4 = "ADDREVIEW {\"business_id\": \"2u4DSD6F8RyFXp-Crhj8OA\", \"user_id\": \"7FcpuLQHNFA9xz8B3PGYNg\", \"text\": \"good burgers\", \"stars\": 2}";
-
-            client.sendRequest(request1);
-            System.out.println(request1);
-            String reply1 = client.getReply();
-            System.out.println(reply1);
-            System.out.println();
-
-            client.sendRequest(request2);
-            System.out.println(request2);
-            String reply2 = client.getReply();
-            System.out.println(reply2);
-            System.out.println();
-
-            client.sendRequest(request3);
-            System.out.println(request3);
-            String reply3 = client.getReply();
-            System.out.println(reply3);
-            System.out.println();
-
-            client.sendRequest(request4);
-            System.out.println(request4);
-            String reply4 = client.getReply();
-            System.out.println(reply4);
-            System.out.println();
-
+            
+            //Send requests here
+            
             client.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();

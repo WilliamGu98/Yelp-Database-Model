@@ -21,30 +21,24 @@ public class ServerTest {
         }      
     });
 
-
-
     @Test
-    public void test1() throws IOException {
-        
-        Thread testClient = new Thread (new Runnable() {
-            public void run() {
-                try {
-                    YelpDBClient client = new YelpDBClient("localhost", 7777);
-                    client.sendRequest("GETRESTAURANT h_we4E3zofRTf4G0JTEF0A");
-                    String reply = client.getReply();
-                    System.out.println(reply);
-                } catch (IOException e) {
-                        
-                }
-            }      
-        });
+    public void testGetRestaurant1() throws IOException {
 
         testServer.start();
-        testClient.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("GETRESTAURANT h_we4E3zofRTf4G0JTEF0A");
+        String reply = client.getReply();
+        
+        //assertEquals(reply, "hey");
+        assertTrue(reply.contains("\"business_id\":\"h_we4E3zofRTf4G0JTEF0A\""));
+        assertTrue(reply.contains("\"name\":\"Fondue Fred\""));
+        
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
         }
+        
     }
 
 }
