@@ -17,7 +17,7 @@ public class YelpUser extends User {
 											// values must be >= 0
 	protected int review_count; // must be >= 0
 	protected String type; // must be "user"
-	protected double average_stars; // 0.0 <= average_stars <= 5.0
+	protected double average_stars; // 0.0 or 1.0 <= average_stars <= 5.0
 
 	public String getURL() {
 		return this.url;

@@ -26,10 +26,7 @@ public class YelpDBServer {
      */
     public YelpDBServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        this.yelpDB = new YelpDB(
-                "data/restaurants.json",
-                "data/reviews.json",
-                "data/users.json");
+        this.yelpDB = new YelpDB("data/restaurants.json", "data/reviews.json", "data/users.json");
     }
 
     /**
@@ -125,6 +122,10 @@ public class YelpDBServer {
         // Check the command to execute a method accordingly
         if (command.equals("GETRESTAURANT")) {
             response = yelpDB.getRestaurantJSON(data);
+        } else if (command.equals("GETUSER")) {
+            response = yelpDB.getUserJSON(data); // For testing
+        } else if (command.equals("GETREVIEW")) {
+            response = yelpDB.getReviewJSON(data); // For testing
         } else if (command.equals("ADDUSER")) {
             try {
                 response = yelpDB.addUserJSON(data);

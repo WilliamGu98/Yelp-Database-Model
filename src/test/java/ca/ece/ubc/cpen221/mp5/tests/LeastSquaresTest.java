@@ -46,10 +46,6 @@ public class LeastSquaresTest {
 		assertEquals(result9, result10, delta);
 		assertEquals(result10, result11, delta);
 		assertEquals(result11, result9, delta);
-		System.out.println(result0);
-		System.out.println(result3);
-		System.out.println(result6);
-		System.out.println(result9);
 	}
 	
 	@Test
@@ -85,10 +81,6 @@ public class LeastSquaresTest {
 		assertEquals(result9, result10, delta);
 		assertEquals(result10, result11, delta);
 		assertEquals(result11, result9, delta);
-		System.out.println(result0);
-		System.out.println(result3);
-		System.out.println(result6);
-		System.out.println(result9);
 	}
 	@Test
 	public void testValues1() throws IOException {
@@ -104,10 +96,6 @@ public class LeastSquaresTest {
 		assertEquals(result6, 4.9, delta);
 		double result9 = myFunction.applyAsDouble(myDatabase, "HXni0_SFPT1jAoH-Sm78Jg"); //price is 4
 		assertEquals(result9, 5.0, delta);
-		System.out.println(result0);
-		System.out.println(result3);
-		System.out.println(result6);
-		System.out.println(result9);
 	}
 	@Test
 	public void testValues2() throws IOException {
