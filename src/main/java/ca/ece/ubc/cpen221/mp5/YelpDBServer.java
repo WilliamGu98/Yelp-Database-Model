@@ -6,14 +6,6 @@ import java.net.Socket;
 
 import com.google.gson.JsonSyntaxException;
 
-/**
- * FibonacciServerMulti is a server that finds the n^th Fibonacci number given
- * n. It accepts requests of the form: Request ::= Number "\n" Number ::= [0-9]+
- * and for each request, returns a reply of the form: Reply ::= (Number | "err")
- * "\n" where a Number is the request Fibonacci number, or "err" is used to
- * indicate a misformatted request. FinbonacciServerMulti can handle multiple
- * concurrent clients.
- */
 public class YelpDBServer {
 
     /**
@@ -22,12 +14,12 @@ public class YelpDBServer {
      * clients that connect the server
      */
 
-    /* Rep invariant */
+    /** Rep invariant **/
     private ServerSocket serverSocket; // serverSocket != null
     private YelpDB yelpDB; // Wraps a non-null yelp database
 
     /**
-     * Make a FibonacciServerMulti that listens for connections on port.
+     * Make a YelpDBServer that listens for connections on port.
      * 
      * @param port
      *            port number, requires 0 <= port <= 65535
@@ -158,7 +150,7 @@ public class YelpDBServer {
     }
 
     /**
-     * Start a FibonacciServerMulti running on some port.
+     * Start a YelpDBServer running on some port.
      */
     public static void main(String[] args) {
         try {
