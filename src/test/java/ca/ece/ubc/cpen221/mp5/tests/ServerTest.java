@@ -138,5 +138,99 @@ public class ServerTest {
         } catch (InterruptedException e) {
         }
     }
+    
+    @Test
+    public void testAddReview1() throws IOException {
+
+        testServer.start();
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        
+        /*Confirm initial average stars and review count of user and restaurant*/
+        
+        client.sendRequest("GETUSER _NH7Cpq3qZkByP5xR4gXog");
+        String initialUserInfo = client.getReply();
+        assertTrue(initialUserInfo.contains("\"review_count\":29"));
+        assertTrue(initialUserInfo.contains("\"average_stars\":3.89")); //Use truncation to confirm
+        
+        client.sendRequest("GETRESTAURANT gclB3ED6uk6viWlolSb_uA");
+        String initialRestaurantInfo = client.getReply();
+        assertTrue(initialRestaurantInfo.contains("\"review_count\":9"));
+        assertTrue(initialRestaurantInfo.contains("\"stars\":2.0"));    
+        
+        client.sendRequest("ADDREVIEW {\"business_id\":\"gclB3ED6uk6viWlolSb_uA\",\"user_id\":\"_NH7Cpq3qZkByP5xR4gXog\",\"text\":\"Good cafe!\",\"stars\":4}");
+        String confirmReply = client.getReply();
+                
+        assertTrue(confirmReply.contains("\"text\":\"Good cafe!\""));
+        assertTrue(confirmReply.contains("\"stars\":4"));
+        
+        /* Confirm that review was added into database */
+        Review rev = gson.fromJson(confirmReply, Review.class);
+        String addedID = rev.getID(); // ID of newly added user
+        
+        client.sendRequest("GETREVIEW " + addedID);
+        String reviewReply = client.getReply();       
+        
+        assertTrue(reviewReply.contains("\"text\":\"Good cafe!\""));
+        assertTrue(reviewReply.contains("\"stars\":4"));
+        
+        /* Confirm that corresponding user and restaurant in database was updated correctly */
+        
+        client.sendRequest("GETUSER _NH7Cpq3qZkByP5xR4gXog");
+        String updatedUserInfo = client.getReply();
+        assertTrue(updatedUserInfo.contains("\"review_count\":30"));
+        assertTrue(updatedUserInfo.contains("\"average_stars\":3.89"));
+        
+        client.sendRequest("GETRESTAURANT gclB3ED6uk6viWlolSb_uA");
+        String updatedRestaurantInfo = client.getReply();
+        assertTrue(updatedRestaurantInfo.contains("\"review_count\":10"));
+        assertTrue(updatedRestaurantInfo.contains("\"stars\":2.2"));   
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    @Test
+    public void testQuery1() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("QUERY in(Telegraph Ave) && (category(Chinese) || category(Western)) && price <= 2");
+        String reply = client.getReply();
+        
+        System.out.println(reply);
+        
+        assertTrue(reply.contains("\"business_id\":\"ERRowW4pGO6pK9sVYyA1nQ\""));
+        assertTrue(reply.contains("\"name\":\"Happy Valley\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"_mv3DhRD3L3okFXYjxX_Cg\""));
+        assertTrue(reply.contains("\"name\":\"Chang Luong Restaurant\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"1E2MQLWfwpsId185Fs2gWw\""));
+        assertTrue(reply.contains("\"name\":\"Peking Express\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"XBPMMfMchDlxZG-qSsSdtw\""));
+        assertTrue(reply.contains("\"name\":\"Lotus House\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"5fneYCWLhgBZQUcNPOch-w\""));
+        assertTrue(reply.contains("\"name\":\"Mandarin House\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"8Xq5VtwYjayKlxEY2PipQA\""));
+        assertTrue(reply.contains("\"name\":\"Sun Hong Kong Restaurant\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"t-xuA4yR02gud00gTS2iyw\""));
+        assertTrue(reply.contains("\"name\":\"Chinese Express\""));
+        
+        assertTrue(!reply.contains("\"price\":3"));
+        assertTrue(!reply.contains("\"price\":4"));
+        assertTrue(!reply.contains("\"price\":5"));
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
 
 }

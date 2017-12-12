@@ -61,7 +61,7 @@ public class CustomTests {
     public void querySearch() throws IOException {
         YelpDBServer serv = new YelpDBServer(7777);
         System.out.println(serv.requestParser(
-                "QUERY in(Telegraph Ave) && (category(Italian) || category(Western)) && (price > 2) && (rating>2)"));
+                "QUERY in(Telegraph Ave) && (category(Italian) || category(Western)) && (price <= 2)"));
     }
 
     //@Test

@@ -281,7 +281,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *            ID of restaurant to return
      * @return returns a string in JSON format of the restaurant info
      */
-    public String getRestaurantJSON(String rID) {
+    public synchronized String getRestaurantJSON(String rID) {
         Restaurant r = this.restaurantMap.get(rID);
         if (r == null) {
             return "ERR: NO_SUCH_RESTAURANT";
@@ -298,7 +298,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *            ID of user to return
      * @return returns a string in JSON format of the user info
      */
-    public String getUserJSON(String uID) {
+    public synchronized String getUserJSON(String uID) {
         YelpUser u = this.userMap.get(uID);
         if (u == null) {
             return "ERR: NO_SUCH_USER";
@@ -315,7 +315,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *            ID of review to return
      * @return returns a string in JSON format of the review info
      */
-    public String getReviewJSON(String rID) {
+    public synchronized String getReviewJSON(String rID) {
         Review r = this.reviewMap.get(rID);
         if (r == null) {
             return "ERR: NO_SUCH_REVIEW";
@@ -334,7 +334,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      * @throws JsonSyntaxException
      *             if jsonInfo is not in json format or if the name field is null
      */
-    public String addUserJSON(String jsonInfo) throws JsonSyntaxException {
+    public synchronized String addUserJSON(String jsonInfo) throws JsonSyntaxException {
         YelpUser user = gson.fromJson(jsonInfo, YelpUser.class);
         // Check if required fields (ie. name) are null
         if (user.getName() == null) {
@@ -358,7 +358,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *             if jsonInfo is not in json format or if any required fields for
      *             restaurant are null
      */
-    public String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
+    public synchronized String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
         // Check if any required fields are null
         if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1 || rest.getFullAddress() == null) {
@@ -382,7 +382,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *             if jsonInfo is not in proper json format or if any required
      *             fields for review are null
      */
-    public String addReviewJSON(String jsonInfo) throws JsonSyntaxException {
+    public synchronized String addReviewJSON(String jsonInfo) throws JsonSyntaxException {
         Review review = gson.fromJson(jsonInfo, Review.class);
 
         // If any required fields are null, throw a JsonSyntaxException (Invalid review
@@ -423,7 +423,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      *         specified by the query, or an error message if the query string is
      *         invalid or no matching restaurants are found
      */
-    public String querySearch(String query) {
+    public synchronized String querySearch(String query) {
         Set<Restaurant> matching;
         try {
             matching = getMatches(query);
