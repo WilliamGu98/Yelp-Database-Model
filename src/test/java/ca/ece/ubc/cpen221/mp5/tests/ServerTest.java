@@ -110,6 +110,72 @@ public class ServerTest {
     }
     
     @Test
+    public void testAddUserExtraInfo() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDUSER {\"name\": \"qwerty123\",\"review_count\": 5,\"extra\": \"\",\"another_one\":5}");
+        String reply1 = client.getReply();
+        
+        assertTrue(reply1.contains("\"name\":\"qwerty123\""));
+        assertTrue(reply1.contains("\"review_count\":0"));
+        assertTrue(reply1.contains("\"average_stars\":0.0"));
+        assertFalse(reply1.contains("\"extra\":\"\""));
+        assertFalse(reply1.contains("\"another_one\":5"));
+        
+        /* Confirm that user was added into database */
+        YelpUser u = gson.fromJson(reply1, YelpUser.class);
+        String addedID = u.getID(); // ID of newly added user
+        
+        client.sendRequest("GETUSER " + addedID);
+        String reply2 = client.getReply();
+        
+        assertTrue(reply2.contains("\"name\":\"qwerty123\""));
+        assertTrue(reply2.contains("\"review_count\":0"));
+        assertTrue(reply2.contains("\"average_stars\":0.0"));
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    @Test
+    public void testAddUserNO_NAME() throws IOException {
+//THIS ONE DOESNT ACTUALLY WORK. IF YOU INSERT " " BETWEEN : AND " LINE 150 IT FAILS
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDUSER {\"name\":\"\"}");
+        String reply1 = client.getReply();
+        
+        assertEquals(reply1, "ERR: INVALID_USER_STRING");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    @Test
+    public void testAddUserInvalid() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDUSER {\"nam\": \"Jim\"}");
+        String reply1 = client.getReply();
+        
+        assertEquals(reply1, "ERR: INVALID_USER_STRING");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    @Test
     public void testAddRestaurant1() throws IOException {
 
         testServer.start();
@@ -132,6 +198,100 @@ public class ServerTest {
         assertTrue(reply2.contains("\"name\":\"McDonalds\""));
         assertTrue(reply2.contains("\"full_address\":\"123 Wimbo Street\""));
         assertTrue(reply2.contains("\"price\":3"));
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    @Test
+    public void testAddRestaurant2() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDRESTAURANT {\"full_address\":\"123 Wimbo Street\",\"price\":3,\"name\":\"McDonalds\"}");
+        String reply1 = client.getReply();
+        
+        assertTrue(reply1.contains("\"name\":\"McDonalds\""));
+        assertTrue(reply1.contains("\"full_address\":\"123 Wimbo Street\""));
+        assertTrue(reply1.contains("\"price\":3"));
+        
+        /* Confirm that restaurant was added into database */
+        Restaurant r = gson.fromJson(reply1, Restaurant.class);
+        String addedID = r.getID(); // ID of newly added user
+        
+        client.sendRequest("GETRESTAURANT " + addedID);
+        String reply2 = client.getReply();       
+        
+        assertTrue(reply2.contains("\"name\":\"McDonalds\""));
+        assertTrue(reply2.contains("\"full_address\":\"123 Wimbo Street\""));
+        assertTrue(reply2.contains("\"price\":3"));
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testAddRestaurantMissingInfo() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDRESTAURANT {\"full_address\":\"123 Wimbo Street\",\"name\":\"McDonalds\"}");
+        String reply1 = client.getReply();
+        
+        assertEquals(reply1, "ERR: INVALID_RESTAURANT_STRING");
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testAddRestaurantInvalidJSon() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDRESTAURANT {\"full_addres\":\"123 Wimbo Street\",\"price\":3,\"name\":\"McDonalds\"}");
+        String reply1 = client.getReply();
+       
+        assertEquals(reply1, "ERR: INVALID_RESTAURANT_STRING");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testAddRestaurantEmptyString() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDRESTAURANT {\"full_address\":\"\",\"price\":3,\"name\":\"McDonalds\"}");
+        String reply1 = client.getReply();
+       
+        assertEquals(reply1, "ERR: INVALID_RESTAURANT_STRING");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testAddRestaurantInvalidPrice() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("ADDRESTAURANT {\"full_address\":\"123 Wimbo Street\",\"name\":\"McDonalds\",\"price\":6}");
+        String reply1 = client.getReply();
+        
+        assertEquals(reply1, "ERR: INVALID_RESTAURANT_STRING");
 
         try {
             TimeUnit.SECONDS.sleep(1);
@@ -223,9 +383,9 @@ public class ServerTest {
         assertTrue(reply.contains("\"business_id\":\"t-xuA4yR02gud00gTS2iyw\""));
         assertTrue(reply.contains("\"name\":\"Chinese Express\""));
         
-        assertTrue(!reply.contains("\"price\":3"));
-        assertTrue(!reply.contains("\"price\":4"));
-        assertTrue(!reply.contains("\"price\":5"));
+        assertFalse(reply.contains("\"price\":3"));
+        assertFalse(reply.contains("\"price\":4"));
+        assertFalse(reply.contains("\"price\":5"));
         
         try {
             TimeUnit.SECONDS.sleep(1);
@@ -233,4 +393,38 @@ public class ServerTest {
         }
     }
 
+    @Test
+    public void testQueryINVALID_QUERY() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("QUERY in(Telegraph Ave) && (categoy(Chinese) || category(Western)) && price <= 2");
+        String reply = client.getReply();
+        
+        System.out.println(reply);
+        assertEquals(reply, "ERR: INVALID_QUERY");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testQueryNO_MATCH() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("QUERY price > 5");
+        String reply = client.getReply();
+        
+        System.out.println(reply);
+        assertEquals(reply, "ERR: NO_MATCH");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
 }
