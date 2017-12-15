@@ -352,6 +352,40 @@ public class ServerTest {
     }
     
     @Test
+    public void testAddReviewIncorrectRestaurant() throws IOException {
+    
+        testServer.start();
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        
+        //this business ID has characters removed from the previous test above
+        client.sendRequest("ADDREVIEW {\"business_id\":\"B3ED6uk6viWlolSb_uA\",\"user_id\":\"_NH7Cpq3qZkByP5xR4gXog\",\"text\":\"Good cafe!\",\"stars\":4}");
+        String confirmReply = client.getReply();
+        
+        assertEquals(confirmReply, "ERR: NO_SUCH_RESTAURANT");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testAddReviewIncorrectUser() throws IOException {
+    
+        testServer.start();
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        
+        //this user ID has characters removed from the previous test above
+        client.sendRequest("ADDREVIEW {\"business_id\":\"gclB3ED6uk6viWlolSb_uA\",\"user_id\":\"Cpq3qZkByP5xR4gXog\",\"text\":\"Good cafe!\",\"stars\":4}");
+        String confirmReply = client.getReply();
+        
+        assertEquals(confirmReply, "ERR: NO_SUCH_USER");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
     public void testQuery1() throws IOException {
 
         testServer.start();
