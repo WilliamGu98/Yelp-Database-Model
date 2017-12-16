@@ -210,11 +210,11 @@ public class ServerTest {
         testServer.start();
         
         YelpDBClient client = new YelpDBClient("localhost", 7777);
-        client.sendRequest("ADDRESTAURANT {\"full_address\":\"123 Wimbo Street\",\"price\":3,\"name\":\"McDonalds\"}");
+        client.sendRequest("ADDRESTAURANT {\"full_address\":\"123 Test Street\",\"price\":3,\"name\":\"McDonalds\"}");
         String reply1 = client.getReply();
         
         assertTrue(reply1.contains("\"name\":\"McDonalds\""));
-        assertTrue(reply1.contains("\"full_address\":\"123 Wimbo Street\""));
+        assertTrue(reply1.contains("\"full_address\":\"123 Test Street\""));
         assertTrue(reply1.contains("\"price\":3"));
         
         /* Confirm that restaurant was added into database */
@@ -225,7 +225,7 @@ public class ServerTest {
         String reply2 = client.getReply();       
         
         assertTrue(reply2.contains("\"name\":\"McDonalds\""));
-        assertTrue(reply2.contains("\"full_address\":\"123 Wimbo Street\""));
+        assertTrue(reply2.contains("\"full_address\":\"123 Test Street\""));
         assertTrue(reply2.contains("\"price\":3"));
 
         try {
@@ -498,6 +498,38 @@ public class ServerTest {
         String reply = client.getReply();
         
         assertEquals(reply, "ERR: ILLEGAL_REQUEST");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testGetUserInvalid() throws IOException { //only for tests and code coverage
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("GETUSER INVALID");
+        String reply = client.getReply();
+        
+        assertEquals(reply, "ERR: NO_SUCH_USER");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testGetReviewInvalid() throws IOException { //only for tests and code coverage
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("GETREVIEW INVALID");
+        String reply = client.getReply();
+        
+        assertEquals(reply, "ERR: NO_SUCH_REVIEW");
         
         try {
             TimeUnit.SECONDS.sleep(1);
