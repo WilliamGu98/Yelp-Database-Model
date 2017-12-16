@@ -504,36 +504,4 @@ public class ServerTest {
         } catch (InterruptedException e) {
         }
     }
-    @Test
-    public void testGetUserInvalid() throws IOException { //only for tests and code coverage
-
-        testServer.start();
-        
-        YelpDBClient client = new YelpDBClient("localhost", 7777);
-        client.sendRequest("GETUSER INVALID");
-        String reply = client.getReply();
-        
-        assertEquals(reply, "ERR: NO_SUCH_USER");
-        
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-        }
-    }
-    @Test
-    public void testGetReviewInvalid() throws IOException { //only for tests and code coverage
-
-        testServer.start();
-        
-        YelpDBClient client = new YelpDBClient("localhost", 7777);
-        client.sendRequest("GETREVIEW INVALID");
-        String reply = client.getReply();
-        
-        assertEquals(reply, "ERR: NO_SUCH_REVIEW");
-        
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-        }
-    }
 }
