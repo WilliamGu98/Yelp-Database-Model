@@ -454,6 +454,11 @@ public class ServerTest {
         
         assertTrue(reply.contains("\"business_id\":\"Ptnj8232ciZyaKAdDIhpdg\""));
         assertTrue(reply.contains("\"name\":\"Planet Kebob"));
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
     }
 
     @Test
