@@ -337,7 +337,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     public synchronized String addUserJSON(String jsonInfo) throws JsonSyntaxException {
         YelpUser user = gson.fromJson(jsonInfo, YelpUser.class);
         // Check if required fields (ie. name) are null
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().equals("")) {
             throw new JsonSyntaxException(jsonInfo);
         }
         user.generateNewUserInfo(this); // Add new user fields (such as user_id, url, votes, etc.)
@@ -351,6 +351,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      * 
      * @param jsonInfo
      *            string in json format that represents new user
+     *            string must not be empty or null
      * @modifies this database by adding a new restaurant if the new restaurant info
      *           is valid
      * @return the json format info of the newly added restaurant
@@ -361,7 +362,7 @@ public class YelpDB implements MP5Db<Restaurant> {
     public synchronized String addRestaurantJSON(String jsonInfo) throws JsonSyntaxException {
         Restaurant rest = gson.fromJson(jsonInfo, Restaurant.class);
         // Check if any required fields are null
-        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1 || rest.getFullAddress() == null) {
+        if (rest.getName() == null || rest.getPrice() > 5 || rest.getPrice() < 1 || rest.getFullAddress() == null || rest.getFullAddress().equals("") || rest.getName().equals("")) {
             throw new JsonSyntaxException(jsonInfo);
         }
         rest.generateNewRestaurantInfo(this);
@@ -374,6 +375,7 @@ public class YelpDB implements MP5Db<Restaurant> {
      * 
      * @param jsonInfo
      *            string in json format that represents new review
+     *            string must not be empty or null
      * @modifies this database by adding a new review if review is valid
      * @return the json format info of the newly added review if valid. If the
      *         review refers to a restaurant or user that does not exist in this
@@ -387,7 +389,7 @@ public class YelpDB implements MP5Db<Restaurant> {
 
         // If any required fields are null, throw a JsonSyntaxException (Invalid review
         // format)
-        if (review.getText() == null || review.getUserId() == null || review.getBusinessId() == null
+        if (review.getText() == null || review.getText().equals("") || review.getUserId() == null || review.getBusinessId() == null
                 || review.getStars() > 5 || review.getStars() < 1) {
             throw new JsonSyntaxException(jsonInfo);
         }

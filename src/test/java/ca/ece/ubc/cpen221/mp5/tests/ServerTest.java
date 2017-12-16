@@ -143,11 +143,10 @@ public class ServerTest {
     
     @Test
     public void testAddUserNO_NAME() throws IOException {
-//THIS ONE DOESNT ACTUALLY WORK. IF YOU INSERT " " BETWEEN : AND " LINE 150 IT FAILS
         testServer.start();
         
         YelpDBClient client = new YelpDBClient("localhost", 7777);
-        client.sendRequest("ADDUSER {\"name\":\"\"}");
+        client.sendRequest("ADDUSER {\"name\"      :     \"\"}");
         String reply1 = client.getReply();
         
         assertEquals(reply1, "ERR: INVALID_USER_STRING");
@@ -159,7 +158,7 @@ public class ServerTest {
     }
     
     @Test
-    public void testAddUserInvalid() throws IOException {
+    public void testAddUserInvalidJSon() throws IOException {
 
         testServer.start();
         
@@ -272,7 +271,7 @@ public class ServerTest {
         testServer.start();
         
         YelpDBClient client = new YelpDBClient("localhost", 7777);
-        client.sendRequest("ADDRESTAURANT {\"full_address\":\"\",\"price\":3,\"name\":\"McDonalds\"}");
+        client.sendRequest("ADDRESTAURANT {\"full_address\": \"\",\"price\":3,\"name\":\"McDonalds\"}");
         String reply1 = client.getReply();
        
         assertEquals(reply1, "ERR: INVALID_RESTAURANT_STRING");
@@ -350,6 +349,23 @@ public class ServerTest {
         } catch (InterruptedException e) {
         }
     }
+    @Test
+    public void testAddReviewEmptyText() throws IOException {
+    
+        testServer.start();
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        
+        //this business ID has characters removed from testAddReview1
+        client.sendRequest("ADDREVIEW {\"business_id\":\"gclB3ED6uk6viWlolSb_uA\",\"user_id\":\"_NH7Cpq3qZkByP5xR4gXog\",\"text\":\"\",\"stars\":4}");
+        String confirmReply = client.getReply();
+        
+        assertEquals(confirmReply, "ERR: INVALID_REVIEW_STRING");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
     
     @Test
     public void testAddReviewIncorrectRestaurant() throws IOException {
@@ -357,7 +373,7 @@ public class ServerTest {
         testServer.start();
         YelpDBClient client = new YelpDBClient("localhost", 7777);
         
-        //this business ID has characters removed from the previous test above
+        //this business ID has characters removed from testAddReview1
         client.sendRequest("ADDREVIEW {\"business_id\":\"B3ED6uk6viWlolSb_uA\",\"user_id\":\"_NH7Cpq3qZkByP5xR4gXog\",\"text\":\"Good cafe!\",\"stars\":4}");
         String confirmReply = client.getReply();
         
@@ -374,7 +390,7 @@ public class ServerTest {
         testServer.start();
         YelpDBClient client = new YelpDBClient("localhost", 7777);
         
-        //this user ID has characters removed from the previous test above
+        //this user ID has characters removed from testAddReview1
         client.sendRequest("ADDREVIEW {\"business_id\":\"gclB3ED6uk6viWlolSb_uA\",\"user_id\":\"Cpq3qZkByP5xR4gXog\",\"text\":\"Good cafe!\",\"stars\":4}");
         String confirmReply = client.getReply();
         
@@ -393,9 +409,7 @@ public class ServerTest {
         YelpDBClient client = new YelpDBClient("localhost", 7777);
         client.sendRequest("QUERY in(Telegraph Ave) && (category(Chinese) || category(Western)) && price <= 2");
         String reply = client.getReply();
-        
-        System.out.println(reply);
-        
+                
         assertTrue(reply.contains("\"business_id\":\"ERRowW4pGO6pK9sVYyA1nQ\""));
         assertTrue(reply.contains("\"name\":\"Happy Valley\""));
         
@@ -426,6 +440,21 @@ public class ServerTest {
         } catch (InterruptedException e) {
         }
     }
+    @Test
+    public void testQuery2() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("QUERY category(Persian)");
+        String reply = client.getReply();
+               
+        assertTrue(reply.contains("\"business_id\":\"HXni0_SFPT1jAoH-Sm78Jg\""));
+        assertTrue(reply.contains("\"name\":\"Alborz\""));
+        
+        assertTrue(reply.contains("\"business_id\":\"Ptnj8232ciZyaKAdDIhpdg\""));
+        assertTrue(reply.contains("\"name\":\"Planet Kebob"));
+    }
 
     @Test
     public void testQueryINVALID_QUERY() throws IOException {
@@ -436,7 +465,6 @@ public class ServerTest {
         client.sendRequest("QUERY in(Telegraph Ave) && (categoy(Chinese) || category(Western)) && price <= 2");
         String reply = client.getReply();
         
-        System.out.println(reply);
         assertEquals(reply, "ERR: INVALID_QUERY");
         
         try {
@@ -453,8 +481,23 @@ public class ServerTest {
         client.sendRequest("QUERY price > 5");
         String reply = client.getReply();
         
-        System.out.println(reply);
         assertEquals(reply, "ERR: NO_MATCH");
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
+    @Test
+    public void testInvalidRequest() throws IOException {
+
+        testServer.start();
+        
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        client.sendRequest("QURY in(Telegraph Ave) && (categoy(Chinese) || category(Western)) && price <= 2");
+        String reply = client.getReply();
+        
+        assertEquals(reply, "ERR: ILLEGAL_REQUEST");
         
         try {
             TimeUnit.SECONDS.sleep(1);

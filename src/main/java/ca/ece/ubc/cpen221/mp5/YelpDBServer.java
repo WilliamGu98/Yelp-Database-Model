@@ -117,9 +117,6 @@ public class YelpDBServer {
 
         String command = words[0];
         String data = words[1];
-        //andrew
-    //    data = data.replaceAll(" ", "");
-        //end
         String response = "ERR: ILLEGAL_REQUEST"; // Default response
 
         // Check the command to execute a method accordingly
@@ -135,33 +132,18 @@ public class YelpDBServer {
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_USER_STRING";
             }
-            //andrew
-        	if (data.contains("\"name\":\"\"")) {	//have to use '.contains' because the param can contain extra inputs which have empty strings (i.e. "user_id: """)
-        		response = "ERR: INVALID_USER_STRING";
-        	}
-        	//end
         } else if (command.equals("ADDRESTAURANT")) {
             try {
                 response = yelpDB.addRestaurantJSON(data);
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_RESTAURANT_STRING";
             }
-            //andrew
-            if (data.contains("\"full_address\":\"\"") || data.contains("\"name\":\"\"")) {	//if the price param is empty or does not contain an integer it will fail
-            	response = "ERR: INVALID_RESTAURANT_STRING";
-            }
-            //end
         } else if (command.equals("ADDREVIEW")) {
             try {
                 response = yelpDB.addReviewJSON(data);
             } catch (JsonSyntaxException e) {
                 response = "ERR: INVALID_REVIEW_STRING";
             }
-            //andrew
-   //         if (data.contains("\"text\":\"\"")) {
-    //        	response = "ERR: INVALID_REVIEW_STRING";
-     //       }
-            //end
         } else if (command.equals("QUERY")) {
             response = yelpDB.querySearch(data);
         }
