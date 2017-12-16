@@ -504,4 +504,22 @@ public class ServerTest {
         } catch (InterruptedException e) {
         }
     }
+    @Test
+    public void testGetUserINVALID() throws IOException {
+    	//this test is strictly for code coverage as GETUSER method is for testing only
+        testServer.start();
+        YelpDBClient client = new YelpDBClient("localhost", 7777);
+        
+        /*Confirm initial average stars and review count of user and restaurant*/
+        
+        client.sendRequest("GETUSER INVALID");
+        String reply = client.getReply();
+        assertEquals(reply, "ERR: NO_SUCH_USER");
+
+        
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+        }
+    }
 }
