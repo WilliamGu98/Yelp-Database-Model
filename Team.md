@@ -1,6 +1,6 @@
 
 Partners for this MP:  
-William Gu / Student# 31875164
+William Gu / Student# 31875164  
 Andrew Liu / Student# 33784166  
   
 **Part 1**:  
